@@ -78,6 +78,9 @@ body {
 }
 
 .storyboard-name {
+  flex: 1;
+  min-width: 0;
+  max-width: 600px;
   font-size: 18px;
   font-weight: 600;
   border: none;
@@ -377,6 +380,16 @@ body {
   padding-right: 30px;
   flex: 1;
   color: var(--text-secondary);
+}
+
+.box-text:empty::before {
+  content: attr(placeholder);
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.box-text:focus:empty::before {
+  content: "";
 }
 
 /* Connection Highlight States */

@@ -717,6 +717,7 @@ function renderBox(box) {
   textEl.className = "box-text";
   textEl.contentEditable = true;
   textEl.textContent = box.text;
+  textEl.setAttribute("placeholder", "Enter text...");
 
   // Save text on blur
   textEl.onblur = () => {
@@ -862,7 +863,7 @@ document.addEventListener("DOMContentLoaded", () => {
       width: 200,
       height: 150,
       title: "",
-      text: "New box",
+      text: "",
       borderColor: "#3498db"
     };
     addBox(box);
@@ -890,7 +891,7 @@ document.addEventListener("DOMContentLoaded", () => {
       width: 200,
       height: 150,
       title: "",
-      text: "New box",
+      text: "",
       borderColor: "#3498db"
     };
     addBox(box);
