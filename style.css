@@ -1,3 +1,43 @@
+/* Theme Variables */
+:root {
+  /* Dark mode (default) */
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-tertiary: #0f0f1a;
+  --bg-box: #1e1e32;
+  --text-primary: #e8e8e8;
+  --text-secondary: #a0a0a0;
+  --text-muted: #666;
+  --border-color: #333;
+  --border-light: #444;
+  --accent: #3498db;
+  --accent-hover: #2980b9;
+  --danger: #e74c3c;
+  --danger-hover: #c0392b;
+  --success: #27ae60;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --resizer-color: #555;
+}
+
+[data-theme="light"] {
+  --bg-primary: #f5f5f5;
+  --bg-secondary: #fff;
+  --bg-tertiary: #fafafa;
+  --bg-box: #fff;
+  --text-primary: #333;
+  --text-secondary: #555;
+  --text-muted: #aaa;
+  --border-color: #ddd;
+  --border-light: #eee;
+  --accent: #3498db;
+  --accent-hover: #2980b9;
+  --danger: #e74c3c;
+  --danger-hover: #c0392b;
+  --success: #27ae60;
+  --shadow: rgba(0, 0, 0, 0.15);
+  --resizer-color: #ccc;
+}
+
 /* Reset */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -8,7 +48,9 @@
 html, body {
   height: 100%;
   font-family: system-ui, -apple-system, sans-serif;
-  background: #f5f5f5;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background 0.2s, color 0.2s;
 }
 
 body {
@@ -22,8 +64,8 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: #fff;
-  border-bottom: 1px solid #ddd;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
 }
 
@@ -34,43 +76,105 @@ body {
   background: transparent;
   padding: 4px 8px;
   border-radius: 4px;
+  color: var(--text-primary);
 }
 
 .storyboard-name:hover {
-  background: #f0f0f0;
+  background: var(--bg-tertiary);
 }
 
 .storyboard-name:focus {
-  outline: 2px solid #3498db;
-  background: #fff;
+  outline: 2px solid var(--accent);
+  background: var(--bg-tertiary);
 }
 
 .header-buttons {
   display: flex;
   gap: 8px;
+  align-items: center;
 }
 
 .btn {
   padding: 8px 16px;
   font-size: 14px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
-  background: #fff;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   cursor: pointer;
+  transition: background 0.15s;
 }
 
 .btn:hover {
-  background: #f0f0f0;
+  background: var(--bg-tertiary);
 }
 
 .btn-primary {
-  background: #3498db;
+  background: var(--accent);
   color: #fff;
-  border-color: #3498db;
+  border-color: var(--accent);
 }
 
 .btn-primary:hover {
-  background: #2980b9;
+  background: var(--accent-hover);
+}
+
+/* Theme Toggle */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+  padding-left: 16px;
+  border-left: 1px solid var(--border-color);
+}
+
+.theme-toggle-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.theme-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.theme-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+[data-theme="light"] .theme-switch::after {
+  transform: translateX(20px);
+}
+
+.theme-switch-icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.theme-switch-icon.moon {
+  left: 5px;
+}
+
+.theme-switch-icon.sun {
+  right: 5px;
 }
 
 /* Canvas Container */
@@ -78,14 +182,14 @@ body {
   flex: 1;
   position: relative;
   overflow: auto;
-  background: #fafafa;
+  background: var(--bg-tertiary);
 }
 
 .canvas-hint {
   position: absolute;
   top: 12px;
   right: 16px;
-  color: #aaa;
+  color: var(--text-muted);
   font-style: italic;
   font-size: 13px;
   pointer-events: none;
@@ -106,11 +210,11 @@ body {
 /* Box Styles */
 .box {
   position: absolute;
-  background: #fff;
-  border: 2px solid #3498db;
+  background: var(--bg-box);
+  border: 2px solid var(--accent);
   border-radius: 4px;
   padding: 12px;
-  padding-bottom: 20px; /* Space for connection handle */
+  padding-bottom: 20px;
   cursor: grab;
   z-index: 1;
   min-width: 200px;
@@ -119,6 +223,7 @@ body {
   flex-direction: column;
   overflow: hidden;
   resize: both;
+  box-shadow: 0 2px 8px var(--shadow);
 }
 
 .box:active {
@@ -127,7 +232,7 @@ body {
 
 /* Resize handle styling */
 .box::-webkit-resizer {
-  background: linear-gradient(-45deg, transparent 30%, #ccc 30%, #ccc 40%, transparent 40%, transparent 60%, #ccc 60%, #ccc 70%, transparent 70%);
+  background: linear-gradient(-45deg, transparent 30%, var(--resizer-color) 30%, var(--resizer-color) 40%, transparent 40%, transparent 60%, var(--resizer-color) 60%, var(--resizer-color) 70%, transparent 70%);
   border-radius: 0 0 4px 0;
 }
 
@@ -137,9 +242,9 @@ body {
   font-weight: 600;
   font-size: 14px;
   margin-bottom: 6px;
-  padding-right: 50px; /* Space for controls */
+  padding-right: 50px;
   min-height: 18px;
-  color: #333;
+  color: var(--text-primary);
   flex-shrink: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -148,7 +253,7 @@ body {
 
 .box-title:empty::before {
   content: attr(placeholder);
-  color: #aaa;
+  color: var(--text-muted);
   font-weight: 400;
   font-style: italic;
 }
@@ -163,17 +268,18 @@ body {
   overflow-wrap: break-word;
   word-break: break-word;
   overflow-y: auto;
-  padding-right: 30px; /* Space for controls */
+  padding-right: 30px;
   flex: 1;
+  color: var(--text-secondary);
 }
 
 /* Connection Highlight States */
 .box.connecting-source {
-  box-shadow: 0 0 0 3px #27ae60;
+  box-shadow: 0 0 0 3px var(--success);
 }
 
 .box.connect-target {
-  box-shadow: 0 0 0 3px #3498db;
+  box-shadow: 0 0 0 3px var(--accent);
 }
 
 /* Box Controls */
@@ -195,7 +301,7 @@ body {
   width: 20px;
   height: 20px;
   border: none;
-  background: #e74c3c;
+  background: var(--danger);
   color: #fff;
   border-radius: 3px;
   cursor: pointer;
@@ -207,13 +313,13 @@ body {
 }
 
 .box-delete:hover {
-  background: #c0392b;
+  background: var(--danger-hover);
 }
 
 .box-color {
   width: 20px;
   height: 20px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 3px;
   cursor: pointer;
   padding: 0;
@@ -247,8 +353,8 @@ body {
   transform: translateX(-50%);
   width: 16px;
   height: 16px;
-  background: #2c3e50;
-  border: 2px solid #fff;
+  background: var(--text-secondary);
+  border: 2px solid var(--bg-box);
   border-radius: 50%;
   cursor: crosshair;
   opacity: 0;
@@ -262,7 +368,7 @@ body {
 
 .box-connect-handle:hover {
   transform: translateX(-50%) scale(1.2);
-  background: #3498db;
+  background: var(--accent);
 }
 
 /* Temp connection line */
@@ -273,11 +379,11 @@ body {
 /* Connection Popover */
 .connection-popover {
   position: absolute;
-  background: #fff;
-  border: 1px solid #ddd;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px var(--shadow);
   z-index: 100;
   min-width: 160px;
   transform: translate(-50%, -100%) translateY(-10px);
@@ -291,9 +397,9 @@ body {
   transform: translateX(-50%) rotate(45deg);
   width: 12px;
   height: 12px;
-  background: #fff;
-  border-right: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .popover-row {
@@ -306,13 +412,13 @@ body {
 
 .popover-label {
   font-size: 13px;
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .popover-color {
   width: 32px;
   height: 32px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   cursor: pointer;
   padding: 0;
@@ -331,15 +437,15 @@ body {
   width: 100%;
   padding: 8px 12px;
   font-size: 13px;
-  color: #e74c3c;
-  background: #fff;
-  border: 1px solid #e74c3c;
+  color: var(--danger);
+  background: var(--bg-secondary);
+  border: 1px solid var(--danger);
   border-radius: 4px;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 
 .popover-delete:hover {
-  background: #e74c3c;
+  background: var(--danger);
   color: #fff;
 }

@@ -1,6 +1,18 @@
 // Storyboard App - State Management
 
 const STORAGE_KEY = 'storyboard-state';
+const THEME_KEY = 'storyboard-theme';
+
+// Theme Management (initialize immediately to prevent flash)
+const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem(THEME_KEY, next);
+}
 
 let state = {
   name: 'Untitled Storyboard',
@@ -627,4 +639,8 @@ document.addEventListener('DOMContentLoaded', () => {
       importInput.value = ''; // Reset for re-import
     }
   });
+
+  // Wire up theme toggle
+  const themeSwitch = document.getElementById('theme-switch');
+  themeSwitch.addEventListener('click', toggleTheme);
 });
