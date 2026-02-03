@@ -1,10 +1,10 @@
 // Main Entry Point
 
-import { state, loadState, saveState, toggleTheme } from "./state.js";
+import { state, loadState, saveState, clearState, toggleTheme } from "./state.js";
 import { initCanvas, updateCanvasBounds, getCanvasPosition } from "./canvas.js";
 import { initConnections, renderAllConnections } from "./connections.js";
-import { initBox, createBox, createBoxInView, renderAllBoxes } from "./box.js";
-import { initIO, exportState, importState } from "./io.js";
+import { initBox, createBox, renderAllBoxes } from "./box.js";
+import { initIO, clearCanvas, exportState, importState } from "./io.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   // Get DOM elements
@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     canvas: document.getElementById("canvas"),
     connectionsSvg: document.getElementById("connections-svg"),
     nameInput: document.getElementById("storyboard-name"),
-    addBoxBtn: document.getElementById("add-box-btn"),
+    clearAllBtn: document.getElementById("clear-all-btn"),
     importBtn: document.getElementById("import-btn"),
     exportBtn: document.getElementById("export-btn"),
     importInput: document.getElementById("import-input"),
@@ -40,8 +40,16 @@ document.addEventListener("DOMContentLoaded", () => {
     saveState();
   });
 
-  // Add box button
-  elements.addBoxBtn.addEventListener("click", createBoxInView);
+  // Clear all button
+  elements.clearAllBtn.addEventListener("click", () => {
+    if (state.boxes.length === 0) return;
+    if (confirm("Clear all boxes and connections?")) {
+      clearCanvas();
+      clearState();
+      elements.nameInput.value = state.name;
+      updateCanvasBounds();
+    }
+  });
 
   // Right-click to add box
   elements.canvasContainer.addEventListener("contextmenu", (e) => {

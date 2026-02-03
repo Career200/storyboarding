@@ -4,11 +4,10 @@ import { state, getBox, addBox, removeBox, generateId, saveState } from "./state
 import { updateCanvasBounds } from "./canvas.js";
 import { updateConnectionsForBox, removeConnectionElement, startDragConnection } from "./connections.js";
 
-let canvas, canvasContainer;
+let canvas;
 
 const initBox = (elements) => {
   canvas = elements.canvas;
-  canvasContainer = elements.canvasContainer;
 };
 
 // Default box properties
@@ -32,13 +31,6 @@ const createBox = (x, y, centered = false) => {
   renderBox(box);
   updateCanvasBounds();
   return box;
-};
-
-// Create box in visible area
-const createBoxInView = () => {
-  const x = canvasContainer.scrollLeft + 100 + Math.random() * 200;
-  const y = canvasContainer.scrollTop + 100 + Math.random() * 200;
-  return createBox(x, y);
 };
 
 // Delete box and its connections
@@ -187,7 +179,6 @@ const renderAllBoxes = () => {
 export {
   initBox,
   createBox,
-  createBoxInView,
   deleteBox,
   renderBox,
   renderAllBoxes

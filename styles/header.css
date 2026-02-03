@@ -63,6 +63,17 @@
   background: var(--accent-hover);
 }
 
+.btn-danger {
+  background: var(--bg-secondary);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.btn-danger:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
 /* Theme Toggle */
 .theme-toggle {
   display: flex;
