@@ -68,6 +68,13 @@ const importInput = document.getElementById('import-input');
 // Connection mode state
 let connectingFrom = null;
 
+// Drag-to-connect state
+let dragConnection = {
+  active: false,
+  fromBoxId: null,
+  tempLine: null
+};
+
 // Update SVG path for a connection
 function updateConnectionPath(conn) {
   const fromBox = getBox(conn.fromBox);
@@ -123,6 +130,141 @@ function updateConnectionsForBox(boxId) {
     .filter(c => c.fromBox === boxId || c.toBox === boxId)
     .forEach(c => updateConnectionPath(c));
 }
+
+// Get box center coordinates
+function getBoxCenter(box) {
+  return {
+    x: box.x + box.width / 2,
+    y: box.y + box.height / 2
+  };
+}
+
+// Get box bottom center (where connection handle is)
+function getBoxBottomCenter(box) {
+  return {
+    x: box.x + box.width / 2,
+    y: box.y + box.height
+  };
+}
+
+// Create temporary line for drag-to-connect
+function createTempLine() {
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  line.setAttribute('stroke', '#2c3e50');
+  line.setAttribute('stroke-width', '2');
+  line.setAttribute('stroke-dasharray', '5,5');
+  line.setAttribute('fill', 'none');
+  line.classList.add('temp-connection');
+  connectionsSvg.appendChild(line);
+  return line;
+}
+
+// Update temporary line position
+function updateTempLine(fromX, fromY, toX, toY) {
+  if (dragConnection.tempLine) {
+    dragConnection.tempLine.setAttribute('d', `M ${fromX} ${fromY} L ${toX} ${toY}`);
+  }
+}
+
+// Find box element at coordinates
+function findBoxAtPoint(x, y, excludeId) {
+  const boxes = document.querySelectorAll('.box');
+  for (const boxEl of boxes) {
+    const boxId = boxEl.dataset.id;
+    if (boxId === excludeId) continue;
+
+    const rect = boxEl.getBoundingClientRect();
+    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+      return boxId;
+    }
+  }
+  return null;
+}
+
+// Start drag-to-connect
+function startDragConnection(boxId, e) {
+  const box = getBox(boxId);
+  if (!box) return;
+
+  dragConnection.active = true;
+  dragConnection.fromBoxId = boxId;
+  dragConnection.tempLine = createTempLine();
+
+  const start = getBoxBottomCenter(box);
+  updateTempLine(start.x, start.y, start.x, start.y);
+
+  // Add highlight to source box
+  const boxEl = document.querySelector(`[data-id="${boxId}"]`);
+  if (boxEl) boxEl.classList.add('connecting-source');
+}
+
+// Handle drag-to-connect move
+function handleDragConnectionMove(e) {
+  if (!dragConnection.active) return;
+
+  const box = getBox(dragConnection.fromBoxId);
+  if (!box) return;
+
+  const start = getBoxBottomCenter(box);
+  const canvasRect = canvas.getBoundingClientRect();
+  const endX = e.clientX - canvasRect.left + canvas.scrollLeft;
+  const endY = e.clientY - canvasRect.top + canvas.scrollTop;
+
+  updateTempLine(start.x, start.y, endX, endY);
+
+  // Highlight target box if hovering
+  const targetId = findBoxAtPoint(e.clientX, e.clientY, dragConnection.fromBoxId);
+  document.querySelectorAll('.box.connect-target').forEach(el => el.classList.remove('connect-target'));
+  if (targetId) {
+    const targetEl = document.querySelector(`[data-id="${targetId}"]`);
+    if (targetEl) targetEl.classList.add('connect-target');
+  }
+}
+
+// End drag-to-connect
+function endDragConnection(e) {
+  if (!dragConnection.active) return;
+
+  // Remove temp line
+  if (dragConnection.tempLine) {
+    dragConnection.tempLine.remove();
+  }
+
+  // Remove highlights
+  document.querySelectorAll('.box.connecting-source, .box.connect-target').forEach(el => {
+    el.classList.remove('connecting-source', 'connect-target');
+  });
+
+  // Check if dropped on a valid target
+  const targetId = findBoxAtPoint(e.clientX, e.clientY, dragConnection.fromBoxId);
+  if (targetId && dragConnection.fromBoxId) {
+    // Check if connection already exists
+    const exists = state.connections.some(c =>
+      (c.fromBox === dragConnection.fromBoxId && c.toBox === targetId) ||
+      (c.fromBox === targetId && c.toBox === dragConnection.fromBoxId)
+    );
+
+    if (!exists) {
+      const conn = {
+        id: generateId('conn'),
+        fromBox: dragConnection.fromBoxId,
+        toBox: targetId,
+        color: '#2c3e50'
+      };
+      addConnection(conn);
+      renderConnection(conn);
+    }
+  }
+
+  // Reset state
+  dragConnection.active = false;
+  dragConnection.fromBoxId = null;
+  dragConnection.tempLine = null;
+}
+
+// Global listeners for drag-to-connect
+document.addEventListener('pointermove', handleDragConnectionMove);
+document.addEventListener('pointerup', endDragConnection);
 
 // Render all connections from state
 function renderAllConnections() {
@@ -271,6 +413,19 @@ function renderBox(box) {
   controlsEl.appendChild(colorInput);
   controlsEl.appendChild(deleteBtn);
 
+  // Title (optional)
+  const titleEl = document.createElement('div');
+  titleEl.className = 'box-title';
+  titleEl.contentEditable = true;
+  titleEl.textContent = box.title || '';
+  titleEl.setAttribute('placeholder', 'Title (optional)');
+
+  // Save title on blur
+  titleEl.onblur = () => {
+    box.title = titleEl.textContent;
+    saveState();
+  };
+
   // Text content
   const textEl = document.createElement('div');
   textEl.className = 'box-text';
@@ -283,8 +438,22 @@ function renderBox(box) {
     saveState();
   };
 
+  // Connection handle at bottom
+  const handleEl = document.createElement('div');
+  handleEl.className = 'box-connect-handle';
+  handleEl.title = 'Drag to connect';
+
+  // Handle drag-to-connect
+  handleEl.onpointerdown = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    startDragConnection(box.id, e);
+  };
+
   boxEl.appendChild(controlsEl);
+  boxEl.appendChild(titleEl);
   boxEl.appendChild(textEl);
+  boxEl.appendChild(handleEl);
 
   // Make box draggable
   makeDraggable(boxEl, box);
@@ -383,6 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
       y: 100 + Math.random() * 200,
       width: 200,
       height: 150,
+      title: '',
       text: 'New box',
       borderColor: '#3498db'
     };
