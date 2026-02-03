@@ -93,6 +93,75 @@ function updateConnectionPath(conn) {
   path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
 }
 
+// Connection popover management
+let activePopover = null;
+
+function closeConnectionPopover() {
+  if (activePopover) {
+    activePopover.remove();
+    activePopover = null;
+  }
+}
+
+function showConnectionPopover(conn, path, x, y) {
+  // Close any existing popover
+  closeConnectionPopover();
+
+  const popover = document.createElement('div');
+  popover.className = 'connection-popover';
+  popover.style.left = `${x}px`;
+  popover.style.top = `${y}px`;
+
+  // Color picker
+  const colorWrapper = document.createElement('div');
+  colorWrapper.className = 'popover-row';
+
+  const colorLabel = document.createElement('span');
+  colorLabel.textContent = 'Color';
+  colorLabel.className = 'popover-label';
+
+  const colorInput = document.createElement('input');
+  colorInput.type = 'color';
+  colorInput.className = 'popover-color';
+  colorInput.value = conn.color;
+  colorInput.oninput = () => {
+    conn.color = colorInput.value;
+    path.setAttribute('stroke', colorInput.value);
+    saveState();
+  };
+
+  colorWrapper.appendChild(colorLabel);
+  colorWrapper.appendChild(colorInput);
+
+  // Delete button
+  const deleteBtn = document.createElement('button');
+  deleteBtn.className = 'popover-delete';
+  deleteBtn.textContent = 'Delete connection';
+  deleteBtn.onclick = () => {
+    removeConnection(conn.id);
+    path.remove();
+    closeConnectionPopover();
+  };
+
+  popover.appendChild(colorWrapper);
+  popover.appendChild(deleteBtn);
+
+  // Close when clicking outside
+  setTimeout(() => {
+    document.addEventListener('pointerdown', handlePopoverOutsideClick);
+  }, 0);
+
+  canvas.appendChild(popover);
+  activePopover = popover;
+}
+
+function handlePopoverOutsideClick(e) {
+  if (activePopover && !activePopover.contains(e.target)) {
+    closeConnectionPopover();
+    document.removeEventListener('pointerdown', handlePopoverOutsideClick);
+  }
+}
+
 // Render a connection as SVG path
 function renderConnection(conn) {
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -101,23 +170,13 @@ function renderConnection(conn) {
   path.setAttribute('stroke-width', '2');
   path.setAttribute('fill', 'none');
 
-  // Click to change color
-  path.onclick = () => {
-    const newColor = prompt('Connection color (hex):', conn.color);
-    if (newColor) {
-      conn.color = newColor;
-      path.setAttribute('stroke', newColor);
-      saveState();
-    }
-  };
-
-  // Right-click to delete
-  path.oncontextmenu = (e) => {
-    e.preventDefault();
-    if (confirm('Delete this connection?')) {
-      removeConnection(conn.id);
-      path.remove();
-    }
+  // Click to show popover
+  path.onclick = (e) => {
+    e.stopPropagation();
+    const canvasRect = canvas.getBoundingClientRect();
+    const x = e.clientX - canvasRect.left + canvas.scrollLeft;
+    const y = e.clientY - canvasRect.top + canvas.scrollTop;
+    showConnectionPopover(conn, path, x, y);
   };
 
   connectionsSvg.appendChild(path);
