@@ -81,6 +81,17 @@ body {
   background: #fafafa;
 }
 
+.canvas-hint {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  color: #aaa;
+  font-style: italic;
+  font-size: 13px;
+  pointer-events: none;
+  z-index: 0;
+}
+
 /* SVG Connections Layer */
 .connections-layer {
   position: absolute;
@@ -142,31 +153,13 @@ body {
   padding-bottom: 20px; /* Space for connection handle */
 }
 
-/* Connection Mode */
-.btn-active {
-  background: #27ae60;
-  color: #fff;
-  border-color: #27ae60;
-}
-
-.btn-active:hover {
-  background: #219a52;
-}
-
+/* Connection Highlight States */
 .box.connecting-source {
   box-shadow: 0 0 0 3px #27ae60;
 }
 
 .box.connect-target {
   box-shadow: 0 0 0 3px #3498db;
-}
-
-.connecting-mode .box {
-  cursor: crosshair;
-}
-
-.connecting-mode .box .box-text {
-  cursor: crosshair;
 }
 
 /* Box Controls */

@@ -59,14 +59,10 @@ const loadState = () => {
 const canvas = document.getElementById('canvas');
 const nameInput = document.getElementById('storyboard-name');
 const addBoxBtn = document.getElementById('add-box-btn');
-const connectBtn = document.getElementById('connect-btn');
 const connectionsSvg = document.getElementById('connections-svg');
 const importBtn = document.getElementById('import-btn');
 const exportBtn = document.getElementById('export-btn');
 const importInput = document.getElementById('import-input');
-
-// Connection mode state
-let connectingFrom = null;
 
 // Drag-to-connect state
 let dragConnection = {
@@ -330,59 +326,11 @@ function renderAllConnections() {
   state.connections.forEach(conn => renderConnection(conn));
 }
 
-// Start connection mode
-function startConnectMode() {
-  canvas.classList.add('connecting-mode');
-  connectBtn.classList.add('btn-active');
-  connectBtn.textContent = 'Cancel';
-}
-
-// End connection mode
-function endConnectMode() {
-  canvas.classList.remove('connecting-mode');
-  connectBtn.classList.remove('btn-active');
-  connectBtn.textContent = 'Connect';
-  connectingFrom = null;
-  // Remove highlight from any selected box
-  document.querySelectorAll('.box.connecting-source').forEach(el => {
-    el.classList.remove('connecting-source');
-  });
-}
-
-// Handle box click during connection mode
-function handleBoxClickForConnection(boxId, boxEl) {
-  if (!canvas.classList.contains('connecting-mode')) return false;
-
-  if (!connectingFrom) {
-    // First click - set source
-    connectingFrom = boxId;
-    boxEl.classList.add('connecting-source');
-  } else if (connectingFrom !== boxId) {
-    // Second click - create connection
-    const conn = {
-      id: generateId('conn'),
-      fromBox: connectingFrom,
-      toBox: boxId,
-      color: '#2c3e50'
-    };
-    addConnection(conn);
-    renderConnection(conn);
-    endConnectMode();
-  }
-  return true;
-}
-
 // Make element draggable using Pointer Events API
 function makeDraggable(element, box) {
   element.style.cursor = 'grab';
 
   element.onpointerdown = (e) => {
-    // Handle connection mode
-    if (canvas.classList.contains('connecting-mode')) {
-      handleBoxClickForConnection(box.id, element);
-      return;
-    }
-
     // Don't drag when clicking on editable text or controls
     if (e.target.hasAttribute('contenteditable')) return;
     if (e.target.closest('.box-controls')) return;
@@ -619,13 +567,31 @@ document.addEventListener('DOMContentLoaded', () => {
     renderBox(box);
   });
 
-  // Wire up Connect button
-  connectBtn.addEventListener('click', () => {
-    if (canvas.classList.contains('connecting-mode')) {
-      endConnectMode();
-    } else {
-      startConnectMode();
-    }
+  // Right-click on canvas to add a new box
+  canvas.addEventListener('contextmenu', (e) => {
+    // Don't create box if clicking on an existing box or its children
+    if (e.target.closest('.box')) return;
+    // Don't create box if clicking on a connection popover
+    if (e.target.closest('.connection-popover')) return;
+
+    e.preventDefault();
+
+    const canvasRect = canvas.getBoundingClientRect();
+    const x = e.clientX - canvasRect.left + canvas.scrollLeft;
+    const y = e.clientY - canvasRect.top + canvas.scrollTop;
+
+    const box = {
+      id: generateId('box'),
+      x: x - 100, // Center the box on click position
+      y: y - 75,
+      width: 200,
+      height: 150,
+      title: '',
+      text: 'New box',
+      borderColor: '#3498db'
+    };
+    addBox(box);
+    renderBox(box);
   });
 
   // Wire up Export button
