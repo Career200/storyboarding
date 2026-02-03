@@ -48,15 +48,14 @@ const deleteBox = (boxId) => {
 // Make element draggable
 const makeDraggable = (element, box) => {
   element.style.cursor = "grab";
+  element.style.touchAction = "none"; // Prevent browser touch gestures
 
   element.onpointerdown = (e) => {
     if (e.target.hasAttribute("contenteditable")) return;
-    if (e.target.closest(".box-controls")) return;
+    if (e.target.closest(".box-controls, .box-resize-handle")) return;
 
-    // Don't drag from resize handle area
-    const rect = element.getBoundingClientRect();
-    if (e.clientX > rect.right - 16 && e.clientY > rect.bottom - 16) return;
-
+    e.preventDefault();
+    e.stopPropagation();
     element.setPointerCapture(e.pointerId);
     element.style.cursor = "grabbing";
 
@@ -150,22 +149,38 @@ const renderBox = (box) => {
     startDragConnection(box.id);
   };
 
-  boxEl.append(controls, title, text, handle);
-  makeDraggable(boxEl, box);
+  // Resize handle
+  const resizeHandle = document.createElement("div");
+  resizeHandle.className = "box-resize-handle";
+  resizeHandle.onpointerdown = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    resizeHandle.setPointerCapture(e.pointerId);
 
-  // Track resize
-  const resizeObserver = new ResizeObserver(() => {
-    const newW = boxEl.offsetWidth;
-    const newH = boxEl.offsetHeight;
-    if (Math.abs(box.width - newW) > 1 || Math.abs(box.height - newH) > 1) {
-      box.width = newW;
-      box.height = newH;
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startWidth = boxEl.offsetWidth;
+    const startHeight = boxEl.offsetHeight;
+
+    resizeHandle.onpointermove = (e) => {
+      const newWidth = Math.max(200, startWidth + e.clientX - startX);
+      const newHeight = Math.max(150, startHeight + e.clientY - startY);
+      boxEl.style.width = `${newWidth}px`;
+      boxEl.style.height = `${newHeight}px`;
+      box.width = newWidth;
+      box.height = newHeight;
       updateConnectionsForBox(box.id);
+    };
+
+    resizeHandle.onpointerup = () => {
+      resizeHandle.onpointermove = null;
       updateCanvasBounds();
       saveState();
-    }
-  });
-  resizeObserver.observe(boxEl);
+    };
+  };
+
+  boxEl.append(controls, title, text, handle, resizeHandle);
+  makeDraggable(boxEl, box);
 
   canvas.appendChild(boxEl);
   return boxEl;

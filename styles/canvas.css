@@ -88,3 +88,46 @@
   background: var(--bg-tertiary);
   color: var(--text-primary);
 }
+
+/* Floating action button for adding boxes (touch devices) */
+.fab-add-box {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 48px;
+  height: 48px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 28px;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: background 0.15s, transform 0.15s;
+  z-index: 50;
+}
+
+.fab-add-box:hover {
+  background: var(--accent-hover);
+}
+
+.fab-add-box:active {
+  transform: scale(0.95);
+}
+
+/* Show FAB on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .fab-add-box {
+    display: flex;
+  }
+
+  /* Update hint text for touch */
+  .canvas-hint {
+    display: none;
+  }
+}

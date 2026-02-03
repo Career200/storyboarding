@@ -19,7 +19,12 @@
         value="My Storyboard"
         class="storyboard-name"
       />
-      <div class="header-buttons">
+      <button class="menu-toggle" id="menu-toggle" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="header-buttons" id="header-buttons">
         <button id="clear-all-btn" class="btn btn-danger">Clear All</button>
         <button id="import-btn" class="btn">Import</button>
         <button id="export-btn" class="btn">Export</button>
@@ -33,6 +38,7 @@
     </header>
 
     <main class="canvas-container" id="canvas-container">
+      <button class="fab-add-box" id="fab-add-box" title="Add box">+</button>
       <button class="back-to-origin" id="back-to-origin" title="Back to origin">
         <svg
           width="16"

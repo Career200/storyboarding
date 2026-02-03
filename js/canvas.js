@@ -58,12 +58,14 @@ const setupDragScroll = () => {
     const isEmptyArea =
       e.target === canvas ||
       e.target === canvasContainer ||
-      e.target.classList.contains("canvas-inner");
+      e.target.classList.contains("canvas-inner") ||
+      e.target.classList.contains("canvas-hint");
 
     if (!isMiddleMouse && !isEmptyArea) return;
-    if (e.target.closest(".box, .connection-popover, .back-to-origin")) return;
+    if (e.target.closest(".box, .connection-popover, .back-to-origin, .fab-add-box")) return;
     if (e.button === 2) return; // Don't intercept right-click
 
+    e.preventDefault(); // Prevent default touch scrolling
     canvasDrag.active = true;
     canvasDrag.startX = e.clientX;
     canvasDrag.startY = e.clientY;

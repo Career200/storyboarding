@@ -18,7 +18,10 @@ document.addEventListener("DOMContentLoaded", () => {
     exportBtn: document.getElementById("export-btn"),
     importInput: document.getElementById("import-input"),
     backToOriginBtn: document.getElementById("back-to-origin"),
-    themeSwitch: document.getElementById("theme-switch")
+    themeSwitch: document.getElementById("theme-switch"),
+    fabAddBox: document.getElementById("fab-add-box"),
+    menuToggle: document.getElementById("menu-toggle"),
+    headerButtons: document.getElementById("header-buttons")
   };
 
   // Initialize modules
@@ -72,4 +75,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Theme toggle
   elements.themeSwitch.addEventListener("click", toggleTheme);
+
+  // FAB button for adding boxes (touch devices)
+  elements.fabAddBox.addEventListener("click", () => {
+    // Create box at center of visible viewport
+    const rect = elements.canvasContainer.getBoundingClientRect();
+    const x = elements.canvasContainer.scrollLeft + rect.width / 2;
+    const y = elements.canvasContainer.scrollTop + rect.height / 2;
+    createBox(x, y, true);
+  });
+
+  // Mobile menu toggle
+  const closeMenu = () => {
+    elements.menuToggle.classList.remove("open");
+    elements.headerButtons.classList.remove("open");
+  };
+
+  elements.menuToggle.addEventListener("click", () => {
+    elements.menuToggle.classList.toggle("open");
+    elements.headerButtons.classList.toggle("open");
+  });
+
+  // Close menu when clicking outside
+  document.addEventListener("pointerdown", (e) => {
+    if (!e.target.closest(".header-buttons, .menu-toggle")) {
+      closeMenu();
+    }
+  });
+
+  // Close menu after button click
+  elements.headerButtons.addEventListener("click", (e) => {
+    if (e.target.closest(".btn")) {
+      closeMenu();
+    }
+  });
 });

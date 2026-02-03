@@ -1,6 +1,6 @@
 // Connection Management
 
-import { state, getBox, addConnection, removeConnection, generateId, saveState } from "./state.js";
+import { state, getBox, addConnection, removeConnection, generateId, saveState, isTouchDevice } from "./state.js";
 import { getCanvasPosition } from "./canvas.js";
 
 let connectionsSvg, canvas, canvasContainer;
@@ -63,19 +63,20 @@ const updateConnectionsForBox = (boxId) => {
 // Apply style to path
 const applyConnectionStyle = (path, style) => {
   path.removeAttribute("stroke-dasharray");
+  const touch = isTouchDevice();
 
   switch (style) {
     case "dashed":
-      path.setAttribute("stroke-dasharray", "8,4");
-      path.setAttribute("stroke-width", "2");
+      path.setAttribute("stroke-dasharray", touch ? "12,6" : "8,4");
+      path.setAttribute("stroke-width", touch ? "4" : "2");
       break;
     case "double":
-      path.setAttribute("stroke-width", "6");
+      path.setAttribute("stroke-width", touch ? "10" : "6");
       path.setAttribute("stroke-dasharray", "0");
       path.style.strokeLinecap = "butt";
       break;
     default:
-      path.setAttribute("stroke-width", "2");
+      path.setAttribute("stroke-width", touch ? "4" : "2");
   }
 };
 
@@ -84,7 +85,7 @@ const createInnerPath = (conn, d) => {
   const innerPath = createSvgElement("path");
   innerPath.id = `conn-${conn.id}-inner`;
   innerPath.setAttribute("stroke", "var(--bg-tertiary)");
-  innerPath.setAttribute("stroke-width", "3");
+  innerPath.setAttribute("stroke-width", isTouchDevice() ? "6" : "3");
   innerPath.setAttribute("fill", "none");
   innerPath.setAttribute("d", d);
   innerPath.style.pointerEvents = "none";
@@ -213,10 +214,11 @@ const startDragConnection = (boxId) => {
   dragConnection.active = true;
   dragConnection.fromBoxId = boxId;
 
+  const touch = isTouchDevice();
   const line = createSvgElement("path");
   line.setAttribute("stroke", "#2c3e50");
-  line.setAttribute("stroke-width", "2");
-  line.setAttribute("stroke-dasharray", "5,5");
+  line.setAttribute("stroke-width", touch ? "4" : "2");
+  line.setAttribute("stroke-dasharray", touch ? "8,8" : "5,5");
   line.setAttribute("fill", "none");
   line.classList.add("temp-connection");
   connectionsSvg.appendChild(line);

@@ -13,7 +13,6 @@
   box-shadow: 0 2px 8px var(--shadow);
   cursor: grab;
   overflow: hidden;
-  resize: both;
   z-index: 1;
 }
 
@@ -21,21 +20,6 @@
   cursor: grabbing;
 }
 
-/* Resize handle */
-.box::-webkit-resizer {
-  background: linear-gradient(
-    -45deg,
-    transparent 30%,
-    var(--resizer-color) 30%,
-    var(--resizer-color) 40%,
-    transparent 40%,
-    transparent 60%,
-    var(--resizer-color) 60%,
-    var(--resizer-color) 70%,
-    transparent 70%
-  );
-  border-radius: 0 0 4px 0;
-}
 
 /* Box controls */
 .box-controls {
@@ -171,4 +155,73 @@
 
 .box.connect-target {
   box-shadow: 0 0 0 3px var(--accent);
+}
+
+/* Custom resize handle (for touch devices and consistency) */
+.box-resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: se-resize;
+  background: linear-gradient(
+    -45deg,
+    transparent 30%,
+    var(--resizer-color) 30%,
+    var(--resizer-color) 40%,
+    transparent 40%,
+    transparent 60%,
+    var(--resizer-color) 60%,
+    var(--resizer-color) 70%,
+    transparent 70%
+  );
+  border-radius: 0 0 4px 0;
+  z-index: 5;
+}
+
+/* Touch device overrides */
+@media (hover: none) and (pointer: coarse) {
+  /* Thicker borders for easier drag targeting */
+  .box {
+    border-width: 6px;
+  }
+
+  /* Always show box controls on touch */
+  .box-controls {
+    opacity: 1;
+  }
+
+  /* Always show connection handle on touch */
+  .box-connect-handle {
+    opacity: 0.7;
+  }
+
+  /* Larger touch targets for controls */
+  .box-delete,
+  .box-color {
+    width: 32px;
+    height: 32px;
+  }
+
+  .box-delete {
+    font-size: 16px;
+  }
+
+  /* Larger connection handle */
+  .box-connect-handle {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* Larger resize handle */
+  .box-resize-handle {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* More padding for title to accommodate larger controls */
+  .box-title {
+    padding-right: 76px;
+  }
 }

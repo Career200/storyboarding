@@ -1,3 +1,10 @@
+/* Touch device detection */
+@media (hover: none) and (pointer: coarse) {
+  :root {
+    --is-touch-device: 1;
+  }
+}
+
 /* Theme Variables */
 :root {
   --bg-primary: #1a1a2e;

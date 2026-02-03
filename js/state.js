@@ -142,6 +142,10 @@ const toggleTheme = () => {
   localStorage.setItem(THEME_KEY, next);
 };
 
+// Touch device detection
+const isTouchDevice = () =>
+  window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
 export {
   state,
   generateId,
@@ -153,5 +157,6 @@ export {
   clearState,
   saveState,
   loadState,
-  toggleTheme
+  toggleTheme,
+  isTouchDevice
 };
