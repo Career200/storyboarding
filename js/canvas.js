@@ -4,8 +4,12 @@ import { state } from "./state.js";
 
 const CANVAS_PADDING = 500;
 const SCROLL_THRESHOLD = 100;
+const ZOOM_MIN = 0.25;
+const ZOOM_MAX = 2;
+const ZOOM_STEP = 0.1;
 
-let canvasContainer, canvas, connectionsSvg, backToOriginBtn;
+let canvasContainer, canvas, connectionsSvg, backToOriginBtn, resetZoomBtn;
+let zoomLevel = 1;
 
 // Drag-to-scroll state
 let canvasDrag = {
@@ -21,9 +25,11 @@ const initCanvas = (elements) => {
   canvas = elements.canvas;
   connectionsSvg = elements.connectionsSvg;
   backToOriginBtn = elements.backToOriginBtn;
+  resetZoomBtn = elements.resetZoomBtn;
 
   setupDragScroll();
   setupBackToOrigin();
+  setupZoom();
 };
 
 // Update canvas size to fit content
@@ -110,12 +116,51 @@ const setupBackToOrigin = () => {
   updateVisibility();
 };
 
-// Get position relative to canvas from mouse event
+// Zoom setup (Ctrl+wheel or pinch)
+const setupZoom = () => {
+  canvas.style.transformOrigin = "0 0";
+
+  const updateZoomButton = () => {
+    resetZoomBtn.classList.toggle("visible", zoomLevel !== 1);
+  };
+
+  canvasContainer.addEventListener("wheel", (e) => {
+    if (!e.ctrlKey) return;
+    e.preventDefault();
+
+    const oldZoom = zoomLevel;
+    const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+    zoomLevel = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoomLevel + delta));
+
+    if (zoomLevel === oldZoom) return;
+
+    // Zoom toward cursor position
+    const rect = canvasContainer.getBoundingClientRect();
+    const cursorX = e.clientX - rect.left + canvasContainer.scrollLeft;
+    const cursorY = e.clientY - rect.top + canvasContainer.scrollTop;
+
+    canvas.style.transform = `scale(${zoomLevel})`;
+    updateZoomButton();
+
+    // Adjust scroll to keep cursor position stable
+    const scale = zoomLevel / oldZoom;
+    canvasContainer.scrollLeft = cursorX * scale - (e.clientX - rect.left);
+    canvasContainer.scrollTop = cursorY * scale - (e.clientY - rect.top);
+  }, { passive: false });
+
+  resetZoomBtn.addEventListener("click", () => {
+    zoomLevel = 1;
+    canvas.style.transform = "";
+    updateZoomButton();
+  });
+};
+
+// Get position relative to canvas from mouse event (accounting for zoom)
 const getCanvasPosition = (e) => {
   const rect = canvasContainer.getBoundingClientRect();
   return {
-    x: e.clientX - rect.left + canvasContainer.scrollLeft,
-    y: e.clientY - rect.top + canvasContainer.scrollTop
+    x: (e.clientX - rect.left + canvasContainer.scrollLeft) / zoomLevel,
+    y: (e.clientY - rect.top + canvasContainer.scrollTop) / zoomLevel
   };
 };
 

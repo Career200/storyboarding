@@ -47,14 +47,44 @@
 
 /* Canvas hint */
 .canvas-hint {
-  position: sticky;
+  position: absolute;
   top: 12px;
   left: 16px;
   color: var(--text-muted);
   font-style: italic;
   font-size: 13px;
   pointer-events: none;
-  z-index: 0;
+  z-index: 100;
+}
+
+/* Reset zoom button */
+.reset-zoom {
+  position: fixed;
+  bottom: 20px;
+  right: 64px;
+  padding: 0 10px;
+  height: 36px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s, background 0.15s, color 0.15s;
+  z-index: 50;
+}
+
+.reset-zoom.visible {
+  display: flex;
+}
+
+.reset-zoom:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 /* Back to origin button */

@@ -38,7 +38,13 @@
     </header>
 
     <main class="canvas-container" id="canvas-container">
+      <span class="canvas-hint">
+        right-click to add a box<br />
+        drag from bottom dot to connect<br />
+        click connection for options
+      </span>
       <button class="fab-add-box" id="fab-add-box" title="Add box">+</button>
+      <button class="reset-zoom" id="reset-zoom" title="Reset zoom">1:1</button>
       <button class="back-to-origin" id="back-to-origin" title="Back to origin">
         <svg
           width="16"
@@ -52,11 +58,6 @@
         </svg>
       </button>
       <div class="canvas-inner" id="canvas">
-        <span class="canvas-hint">
-          right-click to add a box<br />
-          drag from bottom dot to connect<br />
-          click connection for options
-        </span>
         <svg class="connections-layer" id="connections-svg"></svg>
       </div>
     </main>

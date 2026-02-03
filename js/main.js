@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     exportBtn: document.getElementById("export-btn"),
     importInput: document.getElementById("import-input"),
     backToOriginBtn: document.getElementById("back-to-origin"),
+    resetZoomBtn: document.getElementById("reset-zoom"),
     themeSwitch: document.getElementById("theme-switch"),
     fabAddBox: document.getElementById("fab-add-box"),
     menuToggle: document.getElementById("menu-toggle"),
