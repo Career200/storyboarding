@@ -112,4 +112,95 @@ body {
 .box-text {
   outline: none;
   min-height: 20px;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-height: 100%;
+  overflow-y: auto;
+  padding-right: 30px; /* Space for controls */
+}
+
+/* Connection Mode */
+.btn-active {
+  background: #27ae60;
+  color: #fff;
+  border-color: #27ae60;
+}
+
+.btn-active:hover {
+  background: #219a52;
+}
+
+.box.connecting-source {
+  box-shadow: 0 0 0 3px #27ae60;
+}
+
+.connecting-mode .box {
+  cursor: crosshair;
+}
+
+.connecting-mode .box .box-text {
+  cursor: crosshair;
+}
+
+/* Box Controls */
+.box-controls {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.box:hover .box-controls {
+  opacity: 1;
+}
+
+.box-delete {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: #e74c3c;
+  color: #fff;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.box-delete:hover {
+  background: #c0392b;
+}
+
+.box-color {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.box-color::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.box-color::-webkit-color-swatch {
+  border: none;
+  border-radius: 2px;
+}
+
+/* Connection Path Styles */
+.connections-layer path {
+  pointer-events: stroke;
+  cursor: pointer;
+  transition: stroke-width 0.15s;
+}
+
+.connections-layer path:hover {
+  stroke-width: 4;
 }

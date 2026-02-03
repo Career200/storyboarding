@@ -59,10 +59,116 @@ const loadState = () => {
 const canvas = document.getElementById('canvas');
 const nameInput = document.getElementById('storyboard-name');
 const addBoxBtn = document.getElementById('add-box-btn');
+const connectBtn = document.getElementById('connect-btn');
+const connectionsSvg = document.getElementById('connections-svg');
+const importBtn = document.getElementById('import-btn');
+const exportBtn = document.getElementById('export-btn');
+const importInput = document.getElementById('import-input');
 
-// Placeholder for connection updates (implemented in Step 5)
+// Connection mode state
+let connectingFrom = null;
+
+// Update SVG path for a connection
+function updateConnectionPath(conn) {
+  const fromBox = getBox(conn.fromBox);
+  const toBox = getBox(conn.toBox);
+  if (!fromBox || !toBox) return;
+
+  const path = document.getElementById(`conn-${conn.id}`);
+  if (!path) return;
+
+  // Calculate center points
+  const x1 = fromBox.x + fromBox.width / 2;
+  const y1 = fromBox.y + fromBox.height / 2;
+  const x2 = toBox.x + toBox.width / 2;
+  const y2 = toBox.y + toBox.height / 2;
+
+  path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+}
+
+// Render a connection as SVG path
+function renderConnection(conn) {
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.id = `conn-${conn.id}`;
+  path.setAttribute('stroke', conn.color);
+  path.setAttribute('stroke-width', '2');
+  path.setAttribute('fill', 'none');
+
+  // Click to change color
+  path.onclick = () => {
+    const newColor = prompt('Connection color (hex):', conn.color);
+    if (newColor) {
+      conn.color = newColor;
+      path.setAttribute('stroke', newColor);
+      saveState();
+    }
+  };
+
+  // Right-click to delete
+  path.oncontextmenu = (e) => {
+    e.preventDefault();
+    if (confirm('Delete this connection?')) {
+      removeConnection(conn.id);
+      path.remove();
+    }
+  };
+
+  connectionsSvg.appendChild(path);
+  updateConnectionPath(conn);
+}
+
+// Update all connections for a box
 function updateConnectionsForBox(boxId) {
-  // Will update SVG paths when box moves
+  state.connections
+    .filter(c => c.fromBox === boxId || c.toBox === boxId)
+    .forEach(c => updateConnectionPath(c));
+}
+
+// Render all connections from state
+function renderAllConnections() {
+  state.connections.forEach(conn => renderConnection(conn));
+}
+
+// Start connection mode
+function startConnectMode() {
+  canvas.classList.add('connecting-mode');
+  connectBtn.classList.add('btn-active');
+  connectBtn.textContent = 'Cancel';
+}
+
+// End connection mode
+function endConnectMode() {
+  canvas.classList.remove('connecting-mode');
+  connectBtn.classList.remove('btn-active');
+  connectBtn.textContent = 'Connect';
+  connectingFrom = null;
+  // Remove highlight from any selected box
+  document.querySelectorAll('.box.connecting-source').forEach(el => {
+    el.classList.remove('connecting-source');
+  });
+}
+
+// Handle box click during connection mode
+function handleBoxClickForConnection(boxId, boxEl) {
+  if (!canvas.classList.contains('connecting-mode')) return false;
+
+  if (!connectingFrom) {
+    // First click - set source
+    connectingFrom = boxId;
+    boxEl.classList.add('connecting-source');
+  } else if (connectingFrom !== boxId) {
+    // Second click - create connection
+    const conn = {
+      id: generateId('conn'),
+      fromBox: connectingFrom,
+      toBox: boxId,
+      color: '#2c3e50'
+    };
+    addConnection(conn);
+    renderConnection(conn);
+    endConnectMode();
+  }
+  return true;
 }
 
 // Make element draggable using Pointer Events API
@@ -70,8 +176,15 @@ function makeDraggable(element, box) {
   element.style.cursor = 'grab';
 
   element.onpointerdown = (e) => {
-    // Don't drag when clicking on editable text
+    // Handle connection mode
+    if (canvas.classList.contains('connecting-mode')) {
+      handleBoxClickForConnection(box.id, element);
+      return;
+    }
+
+    // Don't drag when clicking on editable text or controls
     if (e.target.hasAttribute('contenteditable')) return;
+    if (e.target.closest('.box-controls')) return;
 
     element.setPointerCapture(e.pointerId);
     element.style.cursor = 'grabbing';
@@ -99,6 +212,27 @@ function makeDraggable(element, box) {
   };
 }
 
+// Delete a box and its connections from DOM and state
+function deleteBox(boxId) {
+  // Get connection IDs before removing from state
+  const connIds = state.connections
+    .filter(c => c.fromBox === boxId || c.toBox === boxId)
+    .map(c => c.id);
+
+  // Remove from state
+  removeBox(boxId);
+
+  // Remove box element
+  const boxEl = document.querySelector(`[data-id="${boxId}"]`);
+  if (boxEl) boxEl.remove();
+
+  // Remove connection elements
+  connIds.forEach(id => {
+    const pathEl = document.getElementById(`conn-${id}`);
+    if (pathEl) pathEl.remove();
+  });
+}
+
 // Render a box element
 function renderBox(box) {
   const boxEl = document.createElement('div');
@@ -110,6 +244,34 @@ function renderBox(box) {
   boxEl.style.height = `${box.height}px`;
   boxEl.style.borderColor = box.borderColor;
 
+  // Controls container (delete button + color picker)
+  const controlsEl = document.createElement('div');
+  controlsEl.className = 'box-controls';
+
+  // Color picker
+  const colorInput = document.createElement('input');
+  colorInput.type = 'color';
+  colorInput.className = 'box-color';
+  colorInput.value = box.borderColor;
+  colorInput.onchange = () => {
+    box.borderColor = colorInput.value;
+    boxEl.style.borderColor = colorInput.value;
+    saveState();
+  };
+
+  // Delete button
+  const deleteBtn = document.createElement('button');
+  deleteBtn.className = 'box-delete';
+  deleteBtn.textContent = 'x';
+  deleteBtn.onclick = (e) => {
+    e.stopPropagation();
+    deleteBox(box.id);
+  };
+
+  controlsEl.appendChild(colorInput);
+  controlsEl.appendChild(deleteBtn);
+
+  // Text content
   const textEl = document.createElement('div');
   textEl.className = 'box-text';
   textEl.contentEditable = true;
@@ -121,6 +283,7 @@ function renderBox(box) {
     saveState();
   };
 
+  boxEl.appendChild(controlsEl);
   boxEl.appendChild(textEl);
 
   // Make box draggable
@@ -135,6 +298,66 @@ function renderAllBoxes() {
   state.boxes.forEach(box => renderBox(box));
 }
 
+// Clear canvas (remove all boxes and connections)
+function clearCanvas() {
+  document.querySelectorAll('.box').forEach(el => el.remove());
+  connectionsSvg.innerHTML = '';
+}
+
+// Render everything from state
+function renderAll() {
+  nameInput.value = state.name;
+  renderAllBoxes();
+  renderAllConnections();
+}
+
+// Export state to JSON file
+function exportState() {
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${state.name || 'storyboard'}.json`;
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+// Import state from JSON file
+function importState(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+
+      // Validate structure
+      if (!Array.isArray(imported.boxes) || !Array.isArray(imported.connections)) {
+        alert('Invalid storyboard file: missing boxes or connections array');
+        return;
+      }
+
+      // Clear current canvas
+      clearCanvas();
+
+      // Load imported state
+      state = {
+        name: imported.name || 'Imported Storyboard',
+        boxes: imported.boxes,
+        connections: imported.connections
+      };
+
+      // Re-render everything
+      renderAll();
+      saveState();
+    } catch (err) {
+      alert('Failed to parse file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
 // Initialization
 document.addEventListener('DOMContentLoaded', () => {
   loadState();
@@ -142,8 +365,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize name input
   nameInput.value = state.name;
 
-  // Render existing boxes
+  // Render existing boxes and connections
   renderAllBoxes();
+  renderAllConnections();
 
   // Wire up name input
   nameInput.addEventListener('input', () => {
@@ -164,5 +388,30 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     addBox(box);
     renderBox(box);
+  });
+
+  // Wire up Connect button
+  connectBtn.addEventListener('click', () => {
+    if (canvas.classList.contains('connecting-mode')) {
+      endConnectMode();
+    } else {
+      startConnectMode();
+    }
+  });
+
+  // Wire up Export button
+  exportBtn.addEventListener('click', exportState);
+
+  // Wire up Import button
+  importBtn.addEventListener('click', () => {
+    importInput.click();
+  });
+
+  importInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      importState(file);
+      importInput.value = ''; // Reset for re-import
+    }
   });
 });
