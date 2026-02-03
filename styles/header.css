@@ -108,5 +108,18 @@
   line-height: 1;
 }
 
-.theme-switch-icon.moon { left: 5px; }
-.theme-switch-icon.sun { right: 5px; }
+.theme-switch-icon.moon {
+  left: 5px;
+}
+.theme-switch-icon.sun {
+  right: 5px;
+}
+
+.attribution {
+  position: fixed;
+  bottom: 2px;
+  left: 4px;
+  font-size: 8px;
+  color: var(--text-secondary);
+  text-decoration: none;
+}
