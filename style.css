@@ -63,6 +63,16 @@ body {
   background: #f0f0f0;
 }
 
+.btn-primary {
+  background: #3498db;
+  color: #fff;
+  border-color: #3498db;
+}
+
+.btn-primary:hover {
+  background: #2980b9;
+}
+
 /* Canvas Container */
 .canvas-container {
   flex: 1;
