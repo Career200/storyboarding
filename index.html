@@ -1,34 +1,43 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Storyboard</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <header class="header">
-    <input type="text" id="storyboard-name" value="My Storyboard" class="storyboard-name">
-    <div class="header-buttons">
-      <button id="add-box-btn" class="btn btn-primary">Add Box</button>
-      <button id="import-btn" class="btn">Import</button>
-      <button id="export-btn" class="btn">Export</button>
-      <div class="theme-toggle">
-        <div class="theme-switch" id="theme-switch" title="Toggle theme">
-          <span class="theme-switch-icon moon">🌙</span>
-          <span class="theme-switch-icon sun">☀️</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Storyboard</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="header">
+      <input
+        type="text"
+        id="storyboard-name"
+        value="My Storyboard"
+        class="storyboard-name"
+      />
+      <div class="header-buttons">
+        <button id="add-box-btn" class="btn btn-primary">Add Box</button>
+        <button id="import-btn" class="btn">Import</button>
+        <button id="export-btn" class="btn">Export</button>
+        <div class="theme-toggle">
+          <div class="theme-switch" id="theme-switch" title="Toggle theme">
+            <span class="theme-switch-icon moon">🌙</span>
+            <span class="theme-switch-icon sun">☀️</span>
+          </div>
         </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <main class="canvas-container" id="canvas">
-    <svg class="connections-layer" id="connections-svg"></svg>
-    <span class="canvas-hint">right-click to add a box</span>
-    <!-- Boxes will be added here dynamically -->
-  </main>
+    <main class="canvas-container" id="canvas">
+      <svg class="connections-layer" id="connections-svg"></svg>
+      <span class="canvas-hint"
+        >right-click to add a box <br />
+        drag from bottom dot to create a connection <br />
+        click on a connection line for line options</span
+      >
+      <!-- Boxes will be added here dynamically -->
+    </main>
 
-  <input type="file" id="import-input" accept=".json" hidden>
-  <script src="app.js"></script>
-</body>
+    <input type="file" id="import-input" accept=".json" hidden />
+    <script src="app.js"></script>
+  </body>
 </html>
