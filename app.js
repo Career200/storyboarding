@@ -71,6 +71,7 @@ const loadState = () => {
 };
 
 // DOM Elements
+const canvasContainer = document.getElementById("canvas-container");
 const canvas = document.getElementById("canvas");
 const nameInput = document.getElementById("storyboard-name");
 const addBoxBtn = document.getElementById("add-box-btn");
@@ -78,6 +79,44 @@ const connectionsSvg = document.getElementById("connections-svg");
 const importBtn = document.getElementById("import-btn");
 const exportBtn = document.getElementById("export-btn");
 const importInput = document.getElementById("import-input");
+
+// Canvas bounds padding (extra space beyond content)
+const CANVAS_PADDING = 500;
+
+// Update canvas size to fit all content
+function updateCanvasBounds() {
+  if (state.boxes.length === 0) {
+    // Reset to minimum size when empty
+    canvas.style.width = "";
+    canvas.style.height = "";
+    connectionsSvg.setAttribute("width", "100%");
+    connectionsSvg.setAttribute("height", "100%");
+    return;
+  }
+
+  // Calculate bounds from all boxes
+  let maxX = 0;
+  let maxY = 0;
+
+  state.boxes.forEach((box) => {
+    const right = box.x + box.width;
+    const bottom = box.y + box.height;
+    if (right > maxX) maxX = right;
+    if (bottom > maxY) maxY = bottom;
+  });
+
+  // Add padding for comfortable scrolling
+  const width = maxX + CANVAS_PADDING;
+  const height = maxY + CANVAS_PADDING;
+
+  // Update canvas inner size
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
+
+  // Update SVG size to match
+  connectionsSvg.setAttribute("width", width);
+  connectionsSvg.setAttribute("height", height);
+}
 
 // Drag-to-connect state
 let dragConnection = {
@@ -295,9 +334,9 @@ function renderConnection(conn) {
   // Click to show popover
   path.onclick = (e) => {
     e.stopPropagation();
-    const canvasRect = canvas.getBoundingClientRect();
-    const x = e.clientX - canvasRect.left + canvas.scrollLeft;
-    const y = e.clientY - canvasRect.top + canvas.scrollTop;
+    const canvasRect = canvasContainer.getBoundingClientRect();
+    const x = e.clientX - canvasRect.left + canvasContainer.scrollLeft;
+    const y = e.clientY - canvasRect.top + canvasContainer.scrollTop;
     showConnectionPopover(conn, path, x, y, innerPath);
   };
 
@@ -398,9 +437,9 @@ function handleDragConnectionMove(e) {
   if (!box) return;
 
   const start = getBoxBottomCenter(box);
-  const canvasRect = canvas.getBoundingClientRect();
-  const endX = e.clientX - canvasRect.left + canvas.scrollLeft;
-  const endY = e.clientY - canvasRect.top + canvas.scrollTop;
+  const canvasRect = canvasContainer.getBoundingClientRect();
+  const endX = e.clientX - canvasRect.left + canvasContainer.scrollLeft;
+  const endY = e.clientY - canvasRect.top + canvasContainer.scrollTop;
 
   updateTempLine(start.x, start.y, endX, endY);
 
@@ -513,6 +552,7 @@ function makeDraggable(element, box) {
     element.onpointerup = () => {
       element.style.cursor = "grab";
       element.onpointermove = null;
+      updateCanvasBounds();
       saveState();
     };
   };
@@ -539,6 +579,8 @@ function deleteBox(boxId) {
     const innerPathEl = document.getElementById(`conn-${id}-inner`);
     if (innerPathEl) innerPathEl.remove();
   });
+
+  updateCanvasBounds();
 }
 
 // Render a box element
@@ -636,6 +678,7 @@ function renderBox(box) {
       box.width = newWidth;
       box.height = newHeight;
       updateConnectionsForBox(box.id);
+      updateCanvasBounds();
       saveState();
     }
   });
@@ -661,6 +704,7 @@ function renderAll() {
   nameInput.value = state.name;
   renderAllBoxes();
   renderAllConnections();
+  updateCanvasBounds();
 }
 
 // Export state to JSON file
@@ -723,6 +767,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Render existing boxes and connections
   renderAllBoxes();
   renderAllConnections();
+  updateCanvasBounds();
 
   // Wire up name input
   nameInput.addEventListener("input", () => {
@@ -732,10 +777,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Wire up Add Box button
   addBoxBtn.addEventListener("click", () => {
+    // Position new box in visible area, accounting for scroll
     const box = {
       id: generateId("box"),
-      x: 100 + Math.random() * 200,
-      y: 100 + Math.random() * 200,
+      x: canvasContainer.scrollLeft + 100 + Math.random() * 200,
+      y: canvasContainer.scrollTop + 100 + Math.random() * 200,
       width: 200,
       height: 150,
       title: "",
@@ -744,10 +790,11 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     addBox(box);
     renderBox(box);
+    updateCanvasBounds();
   });
 
   // Right-click on canvas to add a new box
-  canvas.addEventListener("contextmenu", (e) => {
+  canvasContainer.addEventListener("contextmenu", (e) => {
     // Don't create box if clicking on an existing box or its children
     if (e.target.closest(".box")) return;
     // Don't create box if clicking on a connection popover
@@ -755,9 +802,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     e.preventDefault();
 
-    const canvasRect = canvas.getBoundingClientRect();
-    const x = e.clientX - canvasRect.left + canvas.scrollLeft;
-    const y = e.clientY - canvasRect.top + canvas.scrollTop;
+    const canvasRect = canvasContainer.getBoundingClientRect();
+    const x = e.clientX - canvasRect.left + canvasContainer.scrollLeft;
+    const y = e.clientY - canvasRect.top + canvasContainer.scrollTop;
 
     const box = {
       id: generateId("box"),
@@ -771,6 +818,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     addBox(box);
     renderBox(box);
+    updateCanvasBounds();
   });
 
   // Wire up Export button

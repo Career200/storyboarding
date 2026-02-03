@@ -27,14 +27,16 @@
       </div>
     </header>
 
-    <main class="canvas-container" id="canvas">
-      <svg class="connections-layer" id="connections-svg"></svg>
+    <main class="canvas-container" id="canvas-container">
       <span class="canvas-hint"
         >right-click to add a box <br />
         drag from bottom dot to create a connection <br />
         click on a connection line for line options</span
       >
-      <!-- Boxes will be added here dynamically -->
+      <div class="canvas-inner" id="canvas">
+        <svg class="connections-layer" id="connections-svg"></svg>
+        <!-- Boxes will be added here dynamically -->
+      </div>
     </main>
 
     <input type="file" id="import-input" accept=".json" hidden />
