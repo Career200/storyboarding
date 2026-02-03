@@ -79,6 +79,83 @@ const connectionsSvg = document.getElementById("connections-svg");
 const importBtn = document.getElementById("import-btn");
 const exportBtn = document.getElementById("export-btn");
 const importInput = document.getElementById("import-input");
+const backToOriginBtn = document.getElementById("back-to-origin");
+
+// Drag-to-scroll state
+let canvasDrag = {
+  active: false,
+  startX: 0,
+  startY: 0,
+  scrollLeft: 0,
+  scrollTop: 0
+};
+
+// Setup drag-to-scroll on canvas (middle mouse or empty area drag)
+function setupCanvasDragScroll() {
+  canvasContainer.addEventListener("pointerdown", (e) => {
+    // Only trigger on middle mouse button or on empty canvas area
+    const isMiddleMouse = e.button === 1;
+    const isEmptyArea = e.target === canvas || e.target === canvasContainer || e.target.classList.contains("canvas-inner");
+
+    if (!isMiddleMouse && !isEmptyArea) return;
+    if (e.target.closest(".box")) return;
+    if (e.target.closest(".connection-popover")) return;
+    if (e.target.closest(".back-to-origin")) return;
+
+    // Don't intercept right-click (context menu for adding boxes)
+    if (e.button === 2) return;
+
+    // Start drag-to-scroll
+    canvasDrag.active = true;
+    canvasDrag.startX = e.clientX;
+    canvasDrag.startY = e.clientY;
+    canvasDrag.scrollLeft = canvasContainer.scrollLeft;
+    canvasDrag.scrollTop = canvasContainer.scrollTop;
+
+    canvasContainer.classList.add("dragging-canvas");
+    canvasContainer.setPointerCapture(e.pointerId);
+  });
+
+  canvasContainer.addEventListener("pointermove", (e) => {
+    if (!canvasDrag.active) return;
+
+    const dx = e.clientX - canvasDrag.startX;
+    const dy = e.clientY - canvasDrag.startY;
+
+    canvasContainer.scrollLeft = canvasDrag.scrollLeft - dx;
+    canvasContainer.scrollTop = canvasDrag.scrollTop - dy;
+  });
+
+  canvasContainer.addEventListener("pointerup", () => {
+    if (canvasDrag.active) {
+      canvasDrag.active = false;
+      canvasContainer.classList.remove("dragging-canvas");
+    }
+  });
+
+  canvasContainer.addEventListener("pointercancel", () => {
+    if (canvasDrag.active) {
+      canvasDrag.active = false;
+      canvasContainer.classList.remove("dragging-canvas");
+    }
+  });
+}
+
+// Show/hide back-to-origin button based on scroll position
+function updateBackToOriginVisibility() {
+  const threshold = 100;
+  const isScrolled = canvasContainer.scrollLeft > threshold || canvasContainer.scrollTop > threshold;
+  backToOriginBtn.classList.toggle("visible", isScrolled);
+}
+
+// Scroll back to origin (0, 0)
+function scrollToOrigin() {
+  canvasContainer.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: "smooth"
+  });
+}
 
 // Canvas bounds padding (extra space beyond content)
 const CANVAS_PADDING = 500;
@@ -840,4 +917,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // Wire up theme toggle
   const themeSwitch = document.getElementById("theme-switch");
   themeSwitch.addEventListener("click", toggleTheme);
+
+  // Setup drag-to-scroll
+  setupCanvasDragScroll();
+
+  // Setup back-to-origin button
+  backToOriginBtn.addEventListener("click", scrollToOrigin);
+  canvasContainer.addEventListener("scroll", updateBackToOriginVisibility);
+  updateBackToOriginVisibility();
 });

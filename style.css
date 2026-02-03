@@ -193,6 +193,80 @@ body {
   background: var(--bg-tertiary);
 }
 
+/* Thin scrollbars - Webkit (Chrome, Safari, Edge) */
+.canvas-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.canvas-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.canvas-container::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.canvas-container::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+.canvas-container::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Thin scrollbars - Firefox */
+.canvas-container {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
+/* Drag-to-scroll cursor */
+.canvas-container.dragging-canvas {
+  cursor: grabbing;
+  user-select: none;
+}
+
+/* Inner canvas that expands with content */
+.canvas-inner {
+  position: relative;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+/* Back to origin button */
+.back-to-origin {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.15s, color 0.15s;
+  z-index: 50;
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.back-to-origin.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.back-to-origin:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
 .canvas-hint {
   position: sticky;
   top: 12px;

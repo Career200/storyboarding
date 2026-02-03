@@ -28,12 +28,17 @@
     </header>
 
     <main class="canvas-container" id="canvas-container">
-      <span class="canvas-hint"
-        >right-click to add a box <br />
-        drag from bottom dot to create a connection <br />
-        click on a connection line for line options</span
-      >
+      <button class="back-to-origin" id="back-to-origin" title="Back to origin">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M8 12V4M8 4L4 8M8 4l4 4"/>
+        </svg>
+      </button>
       <div class="canvas-inner" id="canvas">
+        <span class="canvas-hint"
+          >right-click to add a box <br />
+          drag from bottom dot to create a connection <br />
+          click on a connection line for line options</span
+        >
         <svg class="connections-layer" id="connections-svg"></svg>
         <!-- Boxes will be added here dynamically -->
       </div>
