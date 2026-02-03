@@ -113,15 +113,22 @@ body {
   padding-bottom: 20px; /* Space for connection handle */
   cursor: grab;
   z-index: 1;
-  min-width: 150px;
-  min-height: 80px;
+  min-width: 200px;
+  min-height: 150px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  resize: both;
 }
 
 .box:active {
   cursor: grabbing;
+}
+
+/* Resize handle styling */
+.box::-webkit-resizer {
+  background: linear-gradient(-45deg, transparent 30%, #ccc 30%, #ccc 40%, transparent 40%, transparent 60%, #ccc 60%, #ccc 70%, transparent 70%);
+  border-radius: 0 0 4px 0;
 }
 
 /* Box Title */
@@ -134,6 +141,9 @@ body {
   min-height: 18px;
   color: #333;
   flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .box-title:empty::before {

@@ -335,6 +335,11 @@ function makeDraggable(element, box) {
     if (e.target.hasAttribute('contenteditable')) return;
     if (e.target.closest('.box-controls')) return;
 
+    // Don't drag when clicking on resize handle (bottom-right 16x16 area)
+    const rect = element.getBoundingClientRect();
+    const isInResizeArea = (e.clientX > rect.right - 16) && (e.clientY > rect.bottom - 16);
+    if (isInResizeArea) return;
+
     element.setPointerCapture(e.pointerId);
     element.style.cursor = 'grabbing';
 
@@ -464,6 +469,19 @@ function renderBox(box) {
 
   // Make box draggable
   makeDraggable(boxEl, box);
+
+  // Track resize
+  const resizeObserver = new ResizeObserver(() => {
+    const newWidth = boxEl.offsetWidth;
+    const newHeight = boxEl.offsetHeight;
+    if (Math.abs(box.width - newWidth) > 1 || Math.abs(box.height - newHeight) > 1) {
+      box.width = newWidth;
+      box.height = newHeight;
+      updateConnectionsForBox(box.id);
+      saveState();
+    }
+  });
+  resizeObserver.observe(boxEl);
 
   canvas.appendChild(boxEl);
   return boxEl;
