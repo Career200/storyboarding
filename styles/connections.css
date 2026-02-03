@@ -1,0 +1,107 @@
+/* SVG Connections Layer */
+.connections-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.connections-layer path {
+  pointer-events: stroke;
+  cursor: pointer;
+  transition: stroke-width 0.15s;
+}
+
+.connections-layer path:hover {
+  stroke-width: 4;
+}
+
+.temp-connection {
+  pointer-events: none;
+}
+
+/* Connection Popover */
+.connection-popover {
+  position: absolute;
+  min-width: 160px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px var(--shadow);
+  transform: translate(-50%, -100%) translateY(-10px);
+  z-index: 100;
+}
+
+.connection-popover::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.popover-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.popover-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.popover-color {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.popover-color::-webkit-color-swatch-wrapper { padding: 2px; }
+.popover-color::-webkit-color-swatch { border: none; border-radius: 2px; }
+
+.popover-select {
+  min-width: 80px;
+  padding: 6px 10px;
+  font-size: 13px;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.popover-select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.popover-delete {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  background: var(--bg-secondary);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.popover-delete:hover {
+  background: var(--danger);
+  color: #fff;
+}

@@ -1,0 +1,174 @@
+/* Box */
+.box {
+  position: absolute;
+  min-width: 200px;
+  min-height: 150px;
+  padding: 12px;
+  padding-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-box);
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px var(--shadow);
+  cursor: grab;
+  overflow: hidden;
+  resize: both;
+  z-index: 1;
+}
+
+.box:active {
+  cursor: grabbing;
+}
+
+/* Resize handle */
+.box::-webkit-resizer {
+  background: linear-gradient(
+    -45deg,
+    transparent 30%,
+    var(--resizer-color) 30%,
+    var(--resizer-color) 40%,
+    transparent 40%,
+    transparent 60%,
+    var(--resizer-color) 60%,
+    var(--resizer-color) 70%,
+    transparent 70%
+  );
+  border-radius: 0 0 4px 0;
+}
+
+/* Box controls */
+.box-controls {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.box:hover .box-controls {
+  opacity: 1;
+}
+
+.box-delete {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 3px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.box-delete:hover {
+  background: var(--danger-hover);
+}
+
+.box-color {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.box-color::-webkit-color-swatch-wrapper { padding: 0; }
+.box-color::-webkit-color-swatch { border: none; border-radius: 2px; }
+
+/* Box title */
+.box-title {
+  min-height: 18px;
+  margin-bottom: 6px;
+  padding-right: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  outline: none;
+  flex-shrink: 0;
+}
+
+.box-title:focus {
+  overflow-x: auto;
+  text-overflow: clip;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.box-title:focus::-webkit-scrollbar {
+  display: none;
+}
+
+/* Box text */
+.box-text {
+  min-height: 20px;
+  padding-right: 30px;
+  flex: 1;
+  color: var(--text-secondary);
+  overflow-wrap: break-word;
+  word-break: break-word;
+  overflow-y: auto;
+  outline: none;
+}
+
+/* Placeholder styles for title and text */
+.box-title:empty::before,
+.box-text:empty::before {
+  content: attr(placeholder);
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.box-title:empty::before {
+  font-weight: 400;
+}
+
+.box-title:focus:empty::before,
+.box-text:focus:empty::before {
+  content: "";
+}
+
+/* Connection handle */
+.box-connect-handle {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  background: var(--text-secondary);
+  border: 2px solid var(--bg-box);
+  border-radius: 50%;
+  cursor: crosshair;
+  opacity: 0;
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 10;
+}
+
+.box:hover .box-connect-handle {
+  opacity: 1;
+}
+
+.box-connect-handle:hover {
+  transform: translateX(-50%) scale(1.2);
+  background: var(--accent);
+}
+
+/* Connection highlight states */
+.box.connecting-source {
+  box-shadow: 0 0 0 3px var(--success);
+}
+
+.box.connect-target {
+  box-shadow: 0 0 0 3px var(--accent);
+}

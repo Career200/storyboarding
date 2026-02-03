@@ -4,7 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Storyboard</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/png" href="whiteboard.png" />
+    <link rel="stylesheet" href="styles/variables.css" />
+    <link rel="stylesheet" href="styles/header.css" />
+    <link rel="stylesheet" href="styles/canvas.css" />
+    <link rel="stylesheet" href="styles/box.css" />
+    <link rel="stylesheet" href="styles/connections.css" />
   </head>
   <body>
     <header class="header">
@@ -29,22 +34,33 @@
 
     <main class="canvas-container" id="canvas-container">
       <button class="back-to-origin" id="back-to-origin" title="Back to origin">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M8 12V4M8 4L4 8M8 4l4 4"/>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M8 12V4M8 4L4 8M8 4l4 4" />
         </svg>
       </button>
       <div class="canvas-inner" id="canvas">
-        <span class="canvas-hint"
-          >right-click to add a box <br />
-          drag from bottom dot to create a connection <br />
-          click on a connection line for line options</span
-        >
+        <span class="canvas-hint">
+          right-click to add a box<br />
+          drag from bottom dot to connect<br />
+          click connection for options
+        </span>
         <svg class="connections-layer" id="connections-svg"></svg>
-        <!-- Boxes will be added here dynamically -->
       </div>
     </main>
 
     <input type="file" id="import-input" accept=".json" hidden />
-    <script src="app.js"></script>
+    <script type="module" src="js/main.js"></script>
   </body>
+  <a
+    href="https://www.flaticon.com/free-icons/whiteboard"
+    title="whiteboard icons"
+    >Whiteboard icons created by Vector Squad - Flaticon</a
+  >
 </html>
