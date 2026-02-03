@@ -98,7 +98,14 @@ function updateConnectionPath(conn) {
   const x2 = toBox.x + toBox.width / 2;
   const y2 = toBox.y + toBox.height / 2;
 
-  path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+  const d = `M ${x1} ${y1} L ${x2} ${y2}`;
+  path.setAttribute('d', d);
+
+  // Update inner path for double style
+  const innerPath = document.getElementById(`conn-${conn.id}-inner`);
+  if (innerPath) {
+    innerPath.setAttribute('d', d);
+  }
 }
 
 // Connection popover management
@@ -111,7 +118,7 @@ function closeConnectionPopover() {
   }
 }
 
-function showConnectionPopover(conn, path, x, y) {
+function showConnectionPopover(conn, path, x, y, innerPath) {
   // Close any existing popover
   closeConnectionPopover();
 
@@ -141,6 +148,65 @@ function showConnectionPopover(conn, path, x, y) {
   colorWrapper.appendChild(colorLabel);
   colorWrapper.appendChild(colorInput);
 
+  // Style selector
+  const styleWrapper = document.createElement('div');
+  styleWrapper.className = 'popover-row';
+
+  const styleLabel = document.createElement('span');
+  styleLabel.textContent = 'Style';
+  styleLabel.className = 'popover-label';
+
+  const styleSelect = document.createElement('select');
+  styleSelect.className = 'popover-select';
+
+  const styles = [
+    { value: 'solid', label: 'Solid' },
+    { value: 'dashed', label: 'Dashed' },
+    { value: 'double', label: 'Double' }
+  ];
+
+  styles.forEach(s => {
+    const option = document.createElement('option');
+    option.value = s.value;
+    option.textContent = s.label;
+    if ((conn.style || 'solid') === s.value) {
+      option.selected = true;
+    }
+    styleSelect.appendChild(option);
+  });
+
+  styleSelect.onchange = () => {
+    const newStyle = styleSelect.value;
+    const oldStyle = conn.style || 'solid';
+    conn.style = newStyle;
+
+    // Remove old inner path if exists
+    const oldInnerPath = document.getElementById(`conn-${conn.id}-inner`);
+    if (oldInnerPath) {
+      oldInnerPath.remove();
+    }
+
+    // Apply new style
+    applyConnectionStyle(path, newStyle);
+
+    // Create inner path for double style
+    if (newStyle === 'double') {
+      const newInnerPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      newInnerPath.id = `conn-${conn.id}-inner`;
+      newInnerPath.setAttribute('stroke', 'var(--bg-tertiary)');
+      newInnerPath.setAttribute('stroke-width', '3');
+      newInnerPath.setAttribute('fill', 'none');
+      newInnerPath.setAttribute('d', path.getAttribute('d'));
+      newInnerPath.style.pointerEvents = 'none';
+      connectionsSvg.appendChild(newInnerPath);
+    }
+
+    saveState();
+  };
+
+  styleWrapper.appendChild(styleLabel);
+  styleWrapper.appendChild(styleSelect);
+
   // Delete button
   const deleteBtn = document.createElement('button');
   deleteBtn.className = 'popover-delete';
@@ -148,10 +214,16 @@ function showConnectionPopover(conn, path, x, y) {
   deleteBtn.onclick = () => {
     removeConnection(conn.id);
     path.remove();
+    // Also remove inner path if exists
+    const innerPathEl = document.getElementById(`conn-${conn.id}-inner`);
+    if (innerPathEl) {
+      innerPathEl.remove();
+    }
     closeConnectionPopover();
   };
 
   popover.appendChild(colorWrapper);
+  popover.appendChild(styleWrapper);
   popover.appendChild(deleteBtn);
 
   // Close when clicking outside
@@ -170,13 +242,49 @@ function handlePopoverOutsideClick(e) {
   }
 }
 
+// Apply connection style to SVG path
+function applyConnectionStyle(path, style) {
+  // Reset styles
+  path.removeAttribute('stroke-dasharray');
+
+  switch (style) {
+    case 'dashed':
+      path.setAttribute('stroke-dasharray', '8,4');
+      path.setAttribute('stroke-width', '2');
+      break;
+    case 'double':
+      path.setAttribute('stroke-width', '6');
+      path.setAttribute('stroke-dasharray', '0');
+      path.style.strokeLinecap = 'butt';
+      break;
+    default: // solid
+      path.setAttribute('stroke-width', '2');
+  }
+}
+
 // Render a connection as SVG path
 function renderConnection(conn) {
+  // For 'double' style, we need two paths
+  const isDouble = conn.style === 'double';
+
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   path.id = `conn-${conn.id}`;
   path.setAttribute('stroke', conn.color);
-  path.setAttribute('stroke-width', '2');
   path.setAttribute('fill', 'none');
+
+  // Apply style
+  applyConnectionStyle(path, conn.style || 'solid');
+
+  // For double line effect, create inner path
+  let innerPath = null;
+  if (isDouble) {
+    innerPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    innerPath.id = `conn-${conn.id}-inner`;
+    innerPath.setAttribute('stroke', 'var(--bg-tertiary)');
+    innerPath.setAttribute('stroke-width', '3');
+    innerPath.setAttribute('fill', 'none');
+    innerPath.style.pointerEvents = 'none';
+  }
 
   // Click to show popover
   path.onclick = (e) => {
@@ -184,10 +292,13 @@ function renderConnection(conn) {
     const canvasRect = canvas.getBoundingClientRect();
     const x = e.clientX - canvasRect.left + canvas.scrollLeft;
     const y = e.clientY - canvasRect.top + canvas.scrollTop;
-    showConnectionPopover(conn, path, x, y);
+    showConnectionPopover(conn, path, x, y, innerPath);
   };
 
   connectionsSvg.appendChild(path);
+  if (innerPath) {
+    connectionsSvg.appendChild(innerPath);
+  }
   updateConnectionPath(conn);
 }
 
@@ -316,7 +427,8 @@ function endDragConnection(e) {
         id: generateId('conn'),
         fromBox: dragConnection.fromBoxId,
         toBox: targetId,
-        color: '#2c3e50'
+        color: '#2c3e50',
+        style: 'solid'
       };
       addConnection(conn);
       renderConnection(conn);
@@ -392,10 +504,12 @@ function deleteBox(boxId) {
   const boxEl = document.querySelector(`[data-id="${boxId}"]`);
   if (boxEl) boxEl.remove();
 
-  // Remove connection elements
+  // Remove connection elements (including inner paths for double style)
   connIds.forEach(id => {
     const pathEl = document.getElementById(`conn-${id}`);
     if (pathEl) pathEl.remove();
+    const innerPathEl = document.getElementById(`conn-${id}-inner`);
+    if (innerPathEl) innerPathEl.remove();
   });
 }
 
