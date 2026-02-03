@@ -1,31 +1,32 @@
 // Storyboard App - State Management
 
-const STORAGE_KEY = 'storyboard-state';
-const THEME_KEY = 'storyboard-theme';
+const STORAGE_KEY = "storyboard-state";
+const THEME_KEY = "storyboard-theme";
 
 // Theme Management (initialize immediately to prevent flash)
-const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
-document.documentElement.setAttribute('data-theme', savedTheme);
+const savedTheme = localStorage.getItem(THEME_KEY) || "dark";
+document.documentElement.setAttribute("data-theme", savedTheme);
 
 function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
+  const current = document.documentElement.getAttribute("data-theme");
+  const next = current === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
   localStorage.setItem(THEME_KEY, next);
 }
 
 let state = {
-  name: 'Untitled Storyboard',
+  name: "Untitled Storyboard",
   boxes: [],
   connections: []
 };
 
 // ID Generation
-const generateId = (prefix = 'item') => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+const generateId = (prefix = "item") =>
+  `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
 // State Operations
-const getBox = (id) => state.boxes.find(b => b.id === id);
-const getConnection = (id) => state.connections.find(c => c.id === id);
+const getBox = (id) => state.boxes.find((b) => b.id === id);
+const getConnection = (id) => state.connections.find((c) => c.id === id);
 
 const addBox = (box) => {
   state.boxes.push(box);
@@ -34,8 +35,10 @@ const addBox = (box) => {
 };
 
 const removeBox = (id) => {
-  state.boxes = state.boxes.filter(b => b.id !== id);
-  state.connections = state.connections.filter(c => c.fromBox !== id && c.toBox !== id);
+  state.boxes = state.boxes.filter((b) => b.id !== id);
+  state.connections = state.connections.filter(
+    (c) => c.fromBox !== id && c.toBox !== id
+  );
   saveState();
 };
 
@@ -46,7 +49,7 @@ const addConnection = (conn) => {
 };
 
 const removeConnection = (id) => {
-  state.connections = state.connections.filter(c => c.id !== id);
+  state.connections = state.connections.filter((c) => c.id !== id);
   saveState();
 };
 
@@ -61,20 +64,20 @@ const loadState = () => {
     try {
       state = JSON.parse(saved);
     } catch (e) {
-      console.warn('Failed to parse saved state, using default');
+      console.warn("Failed to parse saved state, using default");
     }
   }
   return state;
 };
 
 // DOM Elements
-const canvas = document.getElementById('canvas');
-const nameInput = document.getElementById('storyboard-name');
-const addBoxBtn = document.getElementById('add-box-btn');
-const connectionsSvg = document.getElementById('connections-svg');
-const importBtn = document.getElementById('import-btn');
-const exportBtn = document.getElementById('export-btn');
-const importInput = document.getElementById('import-input');
+const canvas = document.getElementById("canvas");
+const nameInput = document.getElementById("storyboard-name");
+const addBoxBtn = document.getElementById("add-box-btn");
+const connectionsSvg = document.getElementById("connections-svg");
+const importBtn = document.getElementById("import-btn");
+const exportBtn = document.getElementById("export-btn");
+const importInput = document.getElementById("import-input");
 
 // Drag-to-connect state
 let dragConnection = {
@@ -99,12 +102,12 @@ function updateConnectionPath(conn) {
   const y2 = toBox.y + toBox.height / 2;
 
   const d = `M ${x1} ${y1} L ${x2} ${y2}`;
-  path.setAttribute('d', d);
+  path.setAttribute("d", d);
 
   // Update inner path for double style
   const innerPath = document.getElementById(`conn-${conn.id}-inner`);
   if (innerPath) {
-    innerPath.setAttribute('d', d);
+    innerPath.setAttribute("d", d);
   }
 }
 
@@ -122,26 +125,26 @@ function showConnectionPopover(conn, path, x, y, innerPath) {
   // Close any existing popover
   closeConnectionPopover();
 
-  const popover = document.createElement('div');
-  popover.className = 'connection-popover';
+  const popover = document.createElement("div");
+  popover.className = "connection-popover";
   popover.style.left = `${x}px`;
   popover.style.top = `${y}px`;
 
   // Color picker
-  const colorWrapper = document.createElement('div');
-  colorWrapper.className = 'popover-row';
+  const colorWrapper = document.createElement("div");
+  colorWrapper.className = "popover-row";
 
-  const colorLabel = document.createElement('span');
-  colorLabel.textContent = 'Color';
-  colorLabel.className = 'popover-label';
+  const colorLabel = document.createElement("span");
+  colorLabel.textContent = "Color";
+  colorLabel.className = "popover-label";
 
-  const colorInput = document.createElement('input');
-  colorInput.type = 'color';
-  colorInput.className = 'popover-color';
+  const colorInput = document.createElement("input");
+  colorInput.type = "color";
+  colorInput.className = "popover-color";
   colorInput.value = conn.color;
   colorInput.oninput = () => {
     conn.color = colorInput.value;
-    path.setAttribute('stroke', colorInput.value);
+    path.setAttribute("stroke", colorInput.value);
     saveState();
   };
 
@@ -149,27 +152,27 @@ function showConnectionPopover(conn, path, x, y, innerPath) {
   colorWrapper.appendChild(colorInput);
 
   // Style selector
-  const styleWrapper = document.createElement('div');
-  styleWrapper.className = 'popover-row';
+  const styleWrapper = document.createElement("div");
+  styleWrapper.className = "popover-row";
 
-  const styleLabel = document.createElement('span');
-  styleLabel.textContent = 'Style';
-  styleLabel.className = 'popover-label';
+  const styleLabel = document.createElement("span");
+  styleLabel.textContent = "Style";
+  styleLabel.className = "popover-label";
 
-  const styleSelect = document.createElement('select');
-  styleSelect.className = 'popover-select';
+  const styleSelect = document.createElement("select");
+  styleSelect.className = "popover-select";
 
   const styles = [
-    { value: 'solid', label: 'Solid' },
-    { value: 'dashed', label: 'Dashed' },
-    { value: 'double', label: 'Double' }
+    { value: "solid", label: "Solid" },
+    { value: "dashed", label: "Dashed" },
+    { value: "double", label: "Double" }
   ];
 
-  styles.forEach(s => {
-    const option = document.createElement('option');
+  styles.forEach((s) => {
+    const option = document.createElement("option");
     option.value = s.value;
     option.textContent = s.label;
-    if ((conn.style || 'solid') === s.value) {
+    if ((conn.style || "solid") === s.value) {
       option.selected = true;
     }
     styleSelect.appendChild(option);
@@ -177,7 +180,7 @@ function showConnectionPopover(conn, path, x, y, innerPath) {
 
   styleSelect.onchange = () => {
     const newStyle = styleSelect.value;
-    const oldStyle = conn.style || 'solid';
+    const oldStyle = conn.style || "solid";
     conn.style = newStyle;
 
     // Remove old inner path if exists
@@ -190,14 +193,17 @@ function showConnectionPopover(conn, path, x, y, innerPath) {
     applyConnectionStyle(path, newStyle);
 
     // Create inner path for double style
-    if (newStyle === 'double') {
-      const newInnerPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    if (newStyle === "double") {
+      const newInnerPath = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path"
+      );
       newInnerPath.id = `conn-${conn.id}-inner`;
-      newInnerPath.setAttribute('stroke', 'var(--bg-tertiary)');
-      newInnerPath.setAttribute('stroke-width', '3');
-      newInnerPath.setAttribute('fill', 'none');
-      newInnerPath.setAttribute('d', path.getAttribute('d'));
-      newInnerPath.style.pointerEvents = 'none';
+      newInnerPath.setAttribute("stroke", "var(--bg-tertiary)");
+      newInnerPath.setAttribute("stroke-width", "3");
+      newInnerPath.setAttribute("fill", "none");
+      newInnerPath.setAttribute("d", path.getAttribute("d"));
+      newInnerPath.style.pointerEvents = "none";
       connectionsSvg.appendChild(newInnerPath);
     }
 
@@ -208,9 +214,9 @@ function showConnectionPopover(conn, path, x, y, innerPath) {
   styleWrapper.appendChild(styleSelect);
 
   // Delete button
-  const deleteBtn = document.createElement('button');
-  deleteBtn.className = 'popover-delete';
-  deleteBtn.textContent = 'Delete connection';
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "popover-delete";
+  deleteBtn.textContent = "Delete connection";
   deleteBtn.onclick = () => {
     removeConnection(conn.id);
     path.remove();
@@ -228,7 +234,7 @@ function showConnectionPopover(conn, path, x, y, innerPath) {
 
   // Close when clicking outside
   setTimeout(() => {
-    document.addEventListener('pointerdown', handlePopoverOutsideClick);
+    document.addEventListener("pointerdown", handlePopoverOutsideClick);
   }, 0);
 
   canvas.appendChild(popover);
@@ -238,52 +244,52 @@ function showConnectionPopover(conn, path, x, y, innerPath) {
 function handlePopoverOutsideClick(e) {
   if (activePopover && !activePopover.contains(e.target)) {
     closeConnectionPopover();
-    document.removeEventListener('pointerdown', handlePopoverOutsideClick);
+    document.removeEventListener("pointerdown", handlePopoverOutsideClick);
   }
 }
 
 // Apply connection style to SVG path
 function applyConnectionStyle(path, style) {
   // Reset styles
-  path.removeAttribute('stroke-dasharray');
+  path.removeAttribute("stroke-dasharray");
 
   switch (style) {
-    case 'dashed':
-      path.setAttribute('stroke-dasharray', '8,4');
-      path.setAttribute('stroke-width', '2');
+    case "dashed":
+      path.setAttribute("stroke-dasharray", "8,4");
+      path.setAttribute("stroke-width", "2");
       break;
-    case 'double':
-      path.setAttribute('stroke-width', '6');
-      path.setAttribute('stroke-dasharray', '0');
-      path.style.strokeLinecap = 'butt';
+    case "double":
+      path.setAttribute("stroke-width", "6");
+      path.setAttribute("stroke-dasharray", "0");
+      path.style.strokeLinecap = "butt";
       break;
     default: // solid
-      path.setAttribute('stroke-width', '2');
+      path.setAttribute("stroke-width", "2");
   }
 }
 
 // Render a connection as SVG path
 function renderConnection(conn) {
   // For 'double' style, we need two paths
-  const isDouble = conn.style === 'double';
+  const isDouble = conn.style === "double";
 
-  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
   path.id = `conn-${conn.id}`;
-  path.setAttribute('stroke', conn.color);
-  path.setAttribute('fill', 'none');
+  path.setAttribute("stroke", conn.color);
+  path.setAttribute("fill", "none");
 
   // Apply style
-  applyConnectionStyle(path, conn.style || 'solid');
+  applyConnectionStyle(path, conn.style || "solid");
 
   // For double line effect, create inner path
   let innerPath = null;
   if (isDouble) {
-    innerPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    innerPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
     innerPath.id = `conn-${conn.id}-inner`;
-    innerPath.setAttribute('stroke', 'var(--bg-tertiary)');
-    innerPath.setAttribute('stroke-width', '3');
-    innerPath.setAttribute('fill', 'none');
-    innerPath.style.pointerEvents = 'none';
+    innerPath.setAttribute("stroke", "var(--bg-tertiary)");
+    innerPath.setAttribute("stroke-width", "3");
+    innerPath.setAttribute("fill", "none");
+    innerPath.style.pointerEvents = "none";
   }
 
   // Click to show popover
@@ -305,8 +311,8 @@ function renderConnection(conn) {
 // Update all connections for a box
 function updateConnectionsForBox(boxId) {
   state.connections
-    .filter(c => c.fromBox === boxId || c.toBox === boxId)
-    .forEach(c => updateConnectionPath(c));
+    .filter((c) => c.fromBox === boxId || c.toBox === boxId)
+    .forEach((c) => updateConnectionPath(c));
 }
 
 // Get box center coordinates
@@ -327,12 +333,12 @@ function getBoxBottomCenter(box) {
 
 // Create temporary line for drag-to-connect
 function createTempLine() {
-  const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  line.setAttribute('stroke', '#2c3e50');
-  line.setAttribute('stroke-width', '2');
-  line.setAttribute('stroke-dasharray', '5,5');
-  line.setAttribute('fill', 'none');
-  line.classList.add('temp-connection');
+  const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  line.setAttribute("stroke", "#2c3e50");
+  line.setAttribute("stroke-width", "2");
+  line.setAttribute("stroke-dasharray", "5,5");
+  line.setAttribute("fill", "none");
+  line.classList.add("temp-connection");
   connectionsSvg.appendChild(line);
   return line;
 }
@@ -340,19 +346,27 @@ function createTempLine() {
 // Update temporary line position
 function updateTempLine(fromX, fromY, toX, toY) {
   if (dragConnection.tempLine) {
-    dragConnection.tempLine.setAttribute('d', `M ${fromX} ${fromY} L ${toX} ${toY}`);
+    dragConnection.tempLine.setAttribute(
+      "d",
+      `M ${fromX} ${fromY} L ${toX} ${toY}`
+    );
   }
 }
 
 // Find box element at coordinates
 function findBoxAtPoint(x, y, excludeId) {
-  const boxes = document.querySelectorAll('.box');
+  const boxes = document.querySelectorAll(".box");
   for (const boxEl of boxes) {
     const boxId = boxEl.dataset.id;
     if (boxId === excludeId) continue;
 
     const rect = boxEl.getBoundingClientRect();
-    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+    if (
+      x >= rect.left &&
+      x <= rect.right &&
+      y >= rect.top &&
+      y <= rect.bottom
+    ) {
       return boxId;
     }
   }
@@ -373,7 +387,7 @@ function startDragConnection(boxId, e) {
 
   // Add highlight to source box
   const boxEl = document.querySelector(`[data-id="${boxId}"]`);
-  if (boxEl) boxEl.classList.add('connecting-source');
+  if (boxEl) boxEl.classList.add("connecting-source");
 }
 
 // Handle drag-to-connect move
@@ -391,11 +405,17 @@ function handleDragConnectionMove(e) {
   updateTempLine(start.x, start.y, endX, endY);
 
   // Highlight target box if hovering
-  const targetId = findBoxAtPoint(e.clientX, e.clientY, dragConnection.fromBoxId);
-  document.querySelectorAll('.box.connect-target').forEach(el => el.classList.remove('connect-target'));
+  const targetId = findBoxAtPoint(
+    e.clientX,
+    e.clientY,
+    dragConnection.fromBoxId
+  );
+  document
+    .querySelectorAll(".box.connect-target")
+    .forEach((el) => el.classList.remove("connect-target"));
   if (targetId) {
     const targetEl = document.querySelector(`[data-id="${targetId}"]`);
-    if (targetEl) targetEl.classList.add('connect-target');
+    if (targetEl) targetEl.classList.add("connect-target");
   }
 }
 
@@ -409,26 +429,33 @@ function endDragConnection(e) {
   }
 
   // Remove highlights
-  document.querySelectorAll('.box.connecting-source, .box.connect-target').forEach(el => {
-    el.classList.remove('connecting-source', 'connect-target');
-  });
+  document
+    .querySelectorAll(".box.connecting-source, .box.connect-target")
+    .forEach((el) => {
+      el.classList.remove("connecting-source", "connect-target");
+    });
 
   // Check if dropped on a valid target
-  const targetId = findBoxAtPoint(e.clientX, e.clientY, dragConnection.fromBoxId);
+  const targetId = findBoxAtPoint(
+    e.clientX,
+    e.clientY,
+    dragConnection.fromBoxId
+  );
   if (targetId && dragConnection.fromBoxId) {
     // Check if connection already exists
-    const exists = state.connections.some(c =>
-      (c.fromBox === dragConnection.fromBoxId && c.toBox === targetId) ||
-      (c.fromBox === targetId && c.toBox === dragConnection.fromBoxId)
+    const exists = state.connections.some(
+      (c) =>
+        (c.fromBox === dragConnection.fromBoxId && c.toBox === targetId) ||
+        (c.fromBox === targetId && c.toBox === dragConnection.fromBoxId)
     );
 
     if (!exists) {
       const conn = {
-        id: generateId('conn'),
+        id: generateId("conn"),
         fromBox: dragConnection.fromBoxId,
         toBox: targetId,
-        color: '#2c3e50',
-        style: 'solid'
+        color: "#2c3e50",
+        style: "solid"
       };
       addConnection(conn);
       renderConnection(conn);
@@ -442,30 +469,31 @@ function endDragConnection(e) {
 }
 
 // Global listeners for drag-to-connect
-document.addEventListener('pointermove', handleDragConnectionMove);
-document.addEventListener('pointerup', endDragConnection);
+document.addEventListener("pointermove", handleDragConnectionMove);
+document.addEventListener("pointerup", endDragConnection);
 
 // Render all connections from state
 function renderAllConnections() {
-  state.connections.forEach(conn => renderConnection(conn));
+  state.connections.forEach((conn) => renderConnection(conn));
 }
 
 // Make element draggable using Pointer Events API
 function makeDraggable(element, box) {
-  element.style.cursor = 'grab';
+  element.style.cursor = "grab";
 
   element.onpointerdown = (e) => {
     // Don't drag when clicking on editable text or controls
-    if (e.target.hasAttribute('contenteditable')) return;
-    if (e.target.closest('.box-controls')) return;
+    if (e.target.hasAttribute("contenteditable")) return;
+    if (e.target.closest(".box-controls")) return;
 
     // Don't drag when clicking on resize handle (bottom-right 16x16 area)
     const rect = element.getBoundingClientRect();
-    const isInResizeArea = (e.clientX > rect.right - 16) && (e.clientY > rect.bottom - 16);
+    const isInResizeArea =
+      e.clientX > rect.right - 16 && e.clientY > rect.bottom - 16;
     if (isInResizeArea) return;
 
     element.setPointerCapture(e.pointerId);
-    element.style.cursor = 'grabbing';
+    element.style.cursor = "grabbing";
 
     const startX = e.clientX - element.offsetLeft;
     const startY = e.clientY - element.offsetTop;
@@ -483,7 +511,7 @@ function makeDraggable(element, box) {
     };
 
     element.onpointerup = () => {
-      element.style.cursor = 'grab';
+      element.style.cursor = "grab";
       element.onpointermove = null;
       saveState();
     };
@@ -494,8 +522,8 @@ function makeDraggable(element, box) {
 function deleteBox(boxId) {
   // Get connection IDs before removing from state
   const connIds = state.connections
-    .filter(c => c.fromBox === boxId || c.toBox === boxId)
-    .map(c => c.id);
+    .filter((c) => c.fromBox === boxId || c.toBox === boxId)
+    .map((c) => c.id);
 
   // Remove from state
   removeBox(boxId);
@@ -505,7 +533,7 @@ function deleteBox(boxId) {
   if (boxEl) boxEl.remove();
 
   // Remove connection elements (including inner paths for double style)
-  connIds.forEach(id => {
+  connIds.forEach((id) => {
     const pathEl = document.getElementById(`conn-${id}`);
     if (pathEl) pathEl.remove();
     const innerPathEl = document.getElementById(`conn-${id}-inner`);
@@ -515,8 +543,8 @@ function deleteBox(boxId) {
 
 // Render a box element
 function renderBox(box) {
-  const boxEl = document.createElement('div');
-  boxEl.className = 'box';
+  const boxEl = document.createElement("div");
+  boxEl.className = "box";
   boxEl.dataset.id = box.id;
   boxEl.style.left = `${box.x}px`;
   boxEl.style.top = `${box.y}px`;
@@ -525,13 +553,13 @@ function renderBox(box) {
   boxEl.style.borderColor = box.borderColor;
 
   // Controls container (delete button + color picker)
-  const controlsEl = document.createElement('div');
-  controlsEl.className = 'box-controls';
+  const controlsEl = document.createElement("div");
+  controlsEl.className = "box-controls";
 
   // Color picker
-  const colorInput = document.createElement('input');
-  colorInput.type = 'color';
-  colorInput.className = 'box-color';
+  const colorInput = document.createElement("input");
+  colorInput.type = "color";
+  colorInput.className = "box-color";
   colorInput.value = box.borderColor;
   colorInput.onchange = () => {
     box.borderColor = colorInput.value;
@@ -540,9 +568,9 @@ function renderBox(box) {
   };
 
   // Delete button
-  const deleteBtn = document.createElement('button');
-  deleteBtn.className = 'box-delete';
-  deleteBtn.textContent = 'x';
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "box-delete";
+  deleteBtn.textContent = "x";
   deleteBtn.onclick = (e) => {
     e.stopPropagation();
     deleteBox(box.id);
@@ -552,21 +580,22 @@ function renderBox(box) {
   controlsEl.appendChild(deleteBtn);
 
   // Title (optional)
-  const titleEl = document.createElement('div');
-  titleEl.className = 'box-title';
+  const titleEl = document.createElement("div");
+  titleEl.className = "box-title";
   titleEl.contentEditable = true;
-  titleEl.textContent = box.title || '';
-  titleEl.setAttribute('placeholder', 'Title (optional)');
+  titleEl.textContent = box.title || "";
+  titleEl.setAttribute("placeholder", "Title");
 
-  // Save title on blur
+  // Save title on blur and reset scroll to show beginning with ellipsis
   titleEl.onblur = () => {
     box.title = titleEl.textContent;
+    titleEl.scrollLeft = 0;
     saveState();
   };
 
   // Text content
-  const textEl = document.createElement('div');
-  textEl.className = 'box-text';
+  const textEl = document.createElement("div");
+  textEl.className = "box-text";
   textEl.contentEditable = true;
   textEl.textContent = box.text;
 
@@ -577,9 +606,9 @@ function renderBox(box) {
   };
 
   // Connection handle at bottom
-  const handleEl = document.createElement('div');
-  handleEl.className = 'box-connect-handle';
-  handleEl.title = 'Drag to connect';
+  const handleEl = document.createElement("div");
+  handleEl.className = "box-connect-handle";
+  handleEl.title = "Drag to connect";
 
   // Handle drag-to-connect
   handleEl.onpointerdown = (e) => {
@@ -600,7 +629,10 @@ function renderBox(box) {
   const resizeObserver = new ResizeObserver(() => {
     const newWidth = boxEl.offsetWidth;
     const newHeight = boxEl.offsetHeight;
-    if (Math.abs(box.width - newWidth) > 1 || Math.abs(box.height - newHeight) > 1) {
+    if (
+      Math.abs(box.width - newWidth) > 1 ||
+      Math.abs(box.height - newHeight) > 1
+    ) {
       box.width = newWidth;
       box.height = newHeight;
       updateConnectionsForBox(box.id);
@@ -615,13 +647,13 @@ function renderBox(box) {
 
 // Render all boxes from state
 function renderAllBoxes() {
-  state.boxes.forEach(box => renderBox(box));
+  state.boxes.forEach((box) => renderBox(box));
 }
 
 // Clear canvas (remove all boxes and connections)
 function clearCanvas() {
-  document.querySelectorAll('.box').forEach(el => el.remove());
-  connectionsSvg.innerHTML = '';
+  document.querySelectorAll(".box").forEach((el) => el.remove());
+  connectionsSvg.innerHTML = "";
 }
 
 // Render everything from state
@@ -634,12 +666,12 @@ function renderAll() {
 // Export state to JSON file
 function exportState() {
   const data = JSON.stringify(state, null, 2);
-  const blob = new Blob([data], { type: 'application/json' });
+  const blob = new Blob([data], { type: "application/json" });
   const url = URL.createObjectURL(blob);
 
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
-  a.download = `${state.name || 'storyboard'}.json`;
+  a.download = `${state.name || "storyboard"}.json`;
   a.click();
 
   URL.revokeObjectURL(url);
@@ -653,8 +685,11 @@ function importState(file) {
       const imported = JSON.parse(e.target.result);
 
       // Validate structure
-      if (!Array.isArray(imported.boxes) || !Array.isArray(imported.connections)) {
-        alert('Invalid storyboard file: missing boxes or connections array');
+      if (
+        !Array.isArray(imported.boxes) ||
+        !Array.isArray(imported.connections)
+      ) {
+        alert("Invalid storyboard file: missing boxes or connections array");
         return;
       }
 
@@ -663,7 +698,7 @@ function importState(file) {
 
       // Load imported state
       state = {
-        name: imported.name || 'Imported Storyboard',
+        name: imported.name || "Imported Storyboard",
         boxes: imported.boxes,
         connections: imported.connections
       };
@@ -672,14 +707,14 @@ function importState(file) {
       renderAll();
       saveState();
     } catch (err) {
-      alert('Failed to parse file: ' + err.message);
+      alert("Failed to parse file: " + err.message);
     }
   };
   reader.readAsText(file);
 }
 
 // Initialization
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   loadState();
 
   // Initialize name input
@@ -690,33 +725,33 @@ document.addEventListener('DOMContentLoaded', () => {
   renderAllConnections();
 
   // Wire up name input
-  nameInput.addEventListener('input', () => {
+  nameInput.addEventListener("input", () => {
     state.name = nameInput.value;
     saveState();
   });
 
   // Wire up Add Box button
-  addBoxBtn.addEventListener('click', () => {
+  addBoxBtn.addEventListener("click", () => {
     const box = {
-      id: generateId('box'),
+      id: generateId("box"),
       x: 100 + Math.random() * 200,
       y: 100 + Math.random() * 200,
       width: 200,
       height: 150,
-      title: '',
-      text: 'New box',
-      borderColor: '#3498db'
+      title: "",
+      text: "New box",
+      borderColor: "#3498db"
     };
     addBox(box);
     renderBox(box);
   });
 
   // Right-click on canvas to add a new box
-  canvas.addEventListener('contextmenu', (e) => {
+  canvas.addEventListener("contextmenu", (e) => {
     // Don't create box if clicking on an existing box or its children
-    if (e.target.closest('.box')) return;
+    if (e.target.closest(".box")) return;
     // Don't create box if clicking on a connection popover
-    if (e.target.closest('.connection-popover')) return;
+    if (e.target.closest(".connection-popover")) return;
 
     e.preventDefault();
 
@@ -725,36 +760,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const y = e.clientY - canvasRect.top + canvas.scrollTop;
 
     const box = {
-      id: generateId('box'),
+      id: generateId("box"),
       x: x - 100, // Center the box on click position
       y: y - 75,
       width: 200,
       height: 150,
-      title: '',
-      text: 'New box',
-      borderColor: '#3498db'
+      title: "",
+      text: "New box",
+      borderColor: "#3498db"
     };
     addBox(box);
     renderBox(box);
   });
 
   // Wire up Export button
-  exportBtn.addEventListener('click', exportState);
+  exportBtn.addEventListener("click", exportState);
 
   // Wire up Import button
-  importBtn.addEventListener('click', () => {
+  importBtn.addEventListener("click", () => {
     importInput.click();
   });
 
-  importInput.addEventListener('change', (e) => {
+  importInput.addEventListener("change", (e) => {
     const file = e.target.files[0];
     if (file) {
       importState(file);
-      importInput.value = ''; // Reset for re-import
+      importInput.value = ""; // Reset for re-import
     }
   });
 
   // Wire up theme toggle
-  const themeSwitch = document.getElementById('theme-switch');
-  themeSwitch.addEventListener('click', toggleTheme);
+  const themeSwitch = document.getElementById("theme-switch");
+  themeSwitch.addEventListener("click", toggleTheme);
 });

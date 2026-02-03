@@ -251,6 +251,21 @@ body {
   text-overflow: ellipsis;
 }
 
+.box-title:focus {
+  overflow-x: auto;
+  text-overflow: clip;
+}
+
+/* Hide scrollbar while still allowing scroll */
+.box-title:focus::-webkit-scrollbar {
+  display: none;
+}
+
+.box-title:focus {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .box-title:empty::before {
   content: attr(placeholder);
   color: var(--text-muted);
